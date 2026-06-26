@@ -121,7 +121,7 @@ class GeoProbeProvider(Provider):
 
     def _gemini(self, prompt: str):
         r = httpx.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={self.env['GEMINI_API_KEY']}",
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={self.env['GEMINI_API_KEY']}",
             json={"contents": [{"parts": [{"text": prompt}]}]},
             timeout=60.0,
         )
