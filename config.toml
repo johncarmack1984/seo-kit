@@ -1,0 +1,23 @@
+# Which providers run. Tier 0 is the free, working core. Tiers 1-2 were promoted
+# from stubs once keyed (the POC proved the architecture). Tier 3 stays off:
+# Ahrefs/Semrush subscriptions are out of range for this experiment.
+
+[providers]
+# Tier 0 - free
+crawl  = true
+psi    = true
+gsc    = true
+github = true
+bing   = true
+trends = true
+
+# Tier 1 - SERP + keyword volume (PROMOTED 2026-06-26)
+dataforseo = true
+serper     = true
+
+# Tier 2 - GEO / LLM citation probes (PROMOTED 2026-06-26)
+geo_probe = true
+
+# Tier 3 - backlinks + competitor (OUT OF SCOPE: paid subs, "out of range for experimental")
+ahrefs  = false
+semrush = false

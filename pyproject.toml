@@ -1,0 +1,30 @@
+[project]
+name = "seo-kit"
+version = "0.1.0"
+description = "Real-data SEO + GEO (LLM-citation) audit toolkit. Free Tier-0 core; paid tiers are opt-in stubs."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+    "rich>=13.7",
+    "python-dotenv>=1.0",
+]
+
+# Heavier / keyed capabilities are extras so the keyless crawl audit installs
+# clean and fast. Promote tiers by installing the extra + filling the .env.
+[project.optional-dependencies]
+render = ["playwright>=1.44"]                                   # Tier 0: rendered-DOM crawl (JS-gap)
+google = ["google-api-python-client>=2.130", "google-auth-oauthlib>=1.2", "google-auth-httplib2>=0.2"]  # Tier 0: Search Console
+trends = ["pytrends>=4.9"]                                      # Tier 0: Google Trends
+all = ["playwright>=1.44", "google-api-python-client>=2.130", "google-auth-oauthlib>=1.2", "google-auth-httplib2>=0.2", "pytrends>=4.9"]
+
+[project.scripts]
+seo-kit = "seokit.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["seokit"]
