@@ -44,6 +44,11 @@ class GeoProbeProvider(Provider):
             for p in PROBES:
                 try:
                     answer, citations = caller(p)
+                except httpx.HTTPStatusError as e:
+                    code = e.response.status_code
+                    tag = {429: "rate-limited", 503: "overloaded"}.get(code, f"HTTP {code}")
+                    details.append(f"[{p[:30]}...] {tag}")
+                    continue
                 except Exception as e:  # noqa: BLE001 - one engine/prompt failing must not sink the rest
                     details.append(f"[{p[:30]}...] error: {type(e).__name__}")
                     continue
@@ -116,7 +121,7 @@ class GeoProbeProvider(Provider):
 
     def _gemini(self, prompt: str):
         r = httpx.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={self.env['GEMINI_API_KEY']}",
+            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={self.env['GEMINI_API_KEY']}",
             json={"contents": [{"parts": [{"text": prompt}]}]},
             timeout=60.0,
         )
