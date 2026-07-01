@@ -14,6 +14,7 @@ from .audit import run_audit
 from .config import LOCAL_CONFIG, ROOT, load_config, load_env, load_local_config, load_surfaces, surface_from_target
 from .providers import REGISTRY
 from .providers.base import TIER_LABEL
+from .redact import redact_secrets
 from .report import render_json, render_markdown
 from .setup import git_root, infer_github_repo, infer_url, scaffold_toml
 
@@ -44,12 +45,16 @@ def _cmd_audit(args: argparse.Namespace) -> int:
     report = run_audit(surface, config, env, only=only)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    md = render_markdown(report, config, generated=stamp)
+    # Belt and suspenders with the capture-point redaction in run_audit: both
+    # written reports (and the console render of md below) pass through the scrub.
+    md = redact_secrets(render_markdown(report, config, generated=stamp))
     out_dir = local.reports_dir if from_local else ROOT / "reports"
     out_dir.mkdir(parents=True, exist_ok=True)
     md_path = out_dir / f"{surface.id}-{stamp}.md"
     md_path.write_text(md)
-    (out_dir / f"{surface.id}-{stamp}.json").write_text(json.dumps(render_json(report), indent=2, default=str))
+    (out_dir / f"{surface.id}-{stamp}.json").write_text(
+        redact_secrets(json.dumps(render_json(report), indent=2, default=str))
+    )
 
     console.print(Markdown(md))
     console.print(f"\n[dim]saved {md_path} (+ .json)[/]")

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from .config import Surface
 from .providers import REGISTRY
 from .providers.base import ProviderNotEnabled, ProviderResult
+from .redact import redact_secrets
 
 
 @dataclass
@@ -32,6 +33,6 @@ def run_audit(surface: Surface, config: dict, env: dict, only: list[str] | None 
             )
         except Exception as e:  # noqa: BLE001 - a provider failure must not sink the audit
             res = ProviderResult(provider=name, tier=cls.tier, status="error",
-                                 error=f"{type(e).__name__}: {e}")
+                                 error=redact_secrets(f"{type(e).__name__}: {e}"))
         report.results.append(res)
     return report
