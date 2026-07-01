@@ -1,8 +1,11 @@
-# The surfaces seo-kit audits. Add LinkedIn / GitHub profile / products here as
-# they come online. `gsc_property` uses Search Console's identifier form
-# (`sc-domain:<domain>` for a Domain property; a full URL for a URL-prefix one).
+# Global registry: surfaces WITHOUT a repo of their own (someone else's site, a
+# naming experiment, profile pages as they come online). A repo that owns its
+# site carries a per-repo seo-kit.toml instead (`seo-kit setup` scaffolds it;
+# ids there resolve first and its reports land in that repo).
+# `gsc_property` uses Search Console's identifier form (`sc-domain:<domain>`
+# for a Domain property; a full URL for a URL-prefix one).
 #
-# GEO probe config per surface: surface_markers (strings that prove an answer is
-# about THIS entity), namesake_markers (the namesake to disambiguate from),
-# geo_probes (the questions), cite_domains (what counts as a citation).
-# geo_probe skips a surface without these.
+# Migrated to per-repo config 2026-07-01:
+#   johncarmack.com -> johncarmack1984/johncarmack.com  seo-kit.toml
+#   orreryhq.com    -> NewEarthTech/orrery              seo-kit.toml
+# (vegify.app and stormdeck.live were born per-repo in their own repos.)
