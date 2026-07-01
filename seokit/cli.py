@@ -1,4 +1,4 @@
-"""seo-kit command line: audit a surface, list providers, run GSC auth."""
+"""seo-kit command line: audit a site by URL or surface, list providers, run GSC auth."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 from rich.table import Table
 
 from .audit import run_audit
-from .config import ROOT, load_config, load_env, load_surfaces
+from .config import ROOT, load_config, load_env, load_surfaces, surface_from_target
 from .providers import REGISTRY
 from .providers.base import TIER_LABEL
 from .report import render_json, render_markdown
@@ -21,9 +21,14 @@ console = Console()
 
 def _cmd_audit(args: argparse.Namespace) -> int:
     config, env, surfaces = load_config(), load_env(), load_surfaces()
-    surface = surfaces.get(args.surface)
+    # Resolve the target: a surfaces.toml id (full per-target config) OR a raw
+    # URL/domain (portable mode: URL-only providers run, config-needing ones skip).
+    surface = surfaces.get(args.target) or surface_from_target(args.target)
     if not surface:
-        console.print(f"[red]unknown surface '{args.surface}'.[/] known: {', '.join(surfaces) or '(none)'}")
+        console.print(
+            f"[red]'{args.target}' is not a surfaces.toml id or a URL.[/] "
+            f"pass a URL (e.g. https://example.com) or one of: {', '.join(surfaces) or '(none)'}"
+        )
         return 2
 
     only = args.only.split(",") if args.only else None
@@ -66,12 +71,12 @@ def _cmd_auth_gsc(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="seo-kit", description="Real-data SEO + GEO audit toolkit.")
+    parser = argparse.ArgumentParser(prog="seo-kit", description="Real-data SEO + GEO audit toolkit for any site.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_audit = sub.add_parser("audit", help="audit a surface from surfaces.toml")
-    p_audit.add_argument("surface", help="surface id, e.g. example.com")
-    p_audit.add_argument("--only", help="comma-separated provider names to run (e.g. crawl)")
+    p_audit = sub.add_parser("audit", help="audit a site by URL, or a surfaces.toml id")
+    p_audit.add_argument("target", help="a URL (https://example.com) or a surfaces.toml id (e.g. example.com)")
+    p_audit.add_argument("--only", help="comma-separated provider names to run (e.g. crawl,psi)")
     p_audit.set_defaults(func=_cmd_audit)
 
     sub.add_parser("providers", help="list providers, tiers, and env readiness").set_defaults(func=_cmd_providers)

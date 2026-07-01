@@ -28,6 +28,10 @@ class SerperProvider(Provider):
 
         domain = urlparse(surface.url).netloc.replace("www.", "")
         kws = surface.seed_keywords[:10]
+        if not kws:
+            res.status = "skipped"
+            res.find("low", "serper.no_seeds", "surface has no seed_keywords; skipping.")
+            return res
         positions: list[str] = []
         with httpx.Client(timeout=30.0, headers={"X-API-KEY": key, "Content-Type": "application/json"}) as c:
             for kw in kws:

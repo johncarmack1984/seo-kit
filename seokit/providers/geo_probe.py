@@ -1,28 +1,25 @@
 """Tier 2 - GEO / LLM citation + entity-disambiguation probes.
 
-Asks each keyed answer engine about the surface's niche + entity, then scores
-(a) surfaced - is the handle/work mentioned, (b) conflated - is the answer about
-a namesake instead (a site whose owner shares a famous namesake's name), (c) cited - did a web-grounded engine cite the surface. Perplexity is
-the GEO-relevant one (it searches the web + returns citations); the others
-reflect parametric/training knowledge.
+Asks each keyed answer engine the surface's probe questions, then scores
+(a) surfaced - is the entity's handle/work mentioned, (b) conflated - is the
+answer about a namesake instead, (c) cited - did a web-grounded engine cite the
+surface. Perplexity is the GEO-relevant one (it searches the web + returns
+citations); the others reflect parametric/training knowledge.
 
-Cheap models, max_tokens capped, bounded to a small probe set. All plain httpx.
-TODO: move markers + probes into surfaces.toml so this generalizes past the hardcoded POC surface.
+Per-target config comes from the Surface (set in surfaces.toml): surface_markers,
+namesake_markers (optional), geo_probes, cite_domains (optional; defaults to the
+surface domain). With no markers/probes the provider skips, so it never runs one
+target's probes against another.
+
+Cheap models, max_tokens capped, bounded to the surface's probe set. All httpx.
 """
 from __future__ import annotations
+
+from urllib.parse import urlparse
 
 import httpx
 
 from .base import Provider, ProviderResult, Tier
-
-SURFACE_MARKERS = ["example-handle", "example.com"]
-NAMESAKE_MARKERS = ["the famous namesake", "namesake flagship product"]
-
-PROBES = [
-    "Who is example-handle on GitHub, and what do they build?",
-    "There is an engineer who runs example.com (not the famous namesake). What can you tell me about them?",
-    "Name people known for this niche who also publish open source.",
-]
 
 
 class GeoProbeProvider(Provider):
@@ -37,11 +34,21 @@ class GeoProbeProvider(Provider):
             res.find("low", "geo.no_key", "no GEO engine key (PERPLEXITY/OPENAI/ANTHROPIC/GEMINI); skipping.")
             return res
 
+        markers = [m.lower() for m in surface.surface_markers]
+        probes = surface.geo_probes
+        if not markers or not probes:
+            res.status = "skipped"
+            res.find("low", "geo.no_config",
+                     "set surface_markers + geo_probes on the surface (surfaces.toml) to run GEO probes; skipping.")
+            return res
+        namesakes = [m.lower() for m in surface.namesake_markers]
+        cite_domains = [d.lower() for d in (surface.cite_domains or [urlparse(surface.url).netloc.replace("www.", "")])]
+
         total_surfaced = total_conflated = 0
         for ename, caller in engines.items():
             surfaced = conflated = cited = 0
             details: list[str] = []
-            for p in PROBES:
+            for p in probes:
                 try:
                     answer, citations = caller(p)
                 except httpx.HTTPStatusError as e:
@@ -53,24 +60,24 @@ class GeoProbeProvider(Provider):
                     details.append(f"[{p[:30]}...] error: {type(e).__name__}")
                     continue
                 low = (answer or "").lower()
-                is_surfaced = any(m in low for m in SURFACE_MARKERS)
-                is_conflated = (not is_surfaced) and any(m in low for m in NAMESAKE_MARKERS)
-                is_cited = any(any(m in (c or "").lower() for m in SURFACE_MARKERS) for c in citations)
+                is_surfaced = any(m in low for m in markers)
+                is_conflated = (not is_surfaced) and bool(namesakes) and any(m in low for m in namesakes)
+                is_cited = any(any(d in (c or "").lower() for d in cite_domains) for c in citations)
                 surfaced += is_surfaced
                 conflated += is_conflated
                 cited += is_cited
                 details.append(f"[{p[:34]}...] {'surfaced' if is_surfaced else ('CONFLATED' if is_conflated else 'absent')}")
             total_surfaced += surfaced
             total_conflated += conflated
-            res.signal(ename, f"surfaced {surfaced}/{len(PROBES)}, conflated {conflated}, cited {cited}",
+            res.signal(ename, f"surfaced {surfaced}/{len(probes)}, conflated {conflated}, cited {cited}",
                        note="; ".join(details))
 
         if total_conflated:
             res.find("high", "geo.conflation",
-                     f"LLMs conflated you with the famous John Carmack on {total_conflated} probe(s) - the disambiguation gap is real.")
+                     f"answer engines conflated the surface with a namesake on {total_conflated} probe(s) - the disambiguation gap is real.")
         if total_surfaced == 0:
             res.find("high", "geo.invisible",
-                     "No engine surfaced your handle/work on any probe - you are invisible to answer engines for your niche today.")
+                     "no engine surfaced the entity's handle/work on any probe - invisible to answer engines for this niche today.")
         return res
 
     def _engines(self) -> dict:

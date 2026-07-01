@@ -5,6 +5,7 @@ import os
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 
@@ -20,6 +21,27 @@ class Surface:
     github_repo: str | None = None
     positioning: str = ""
     seed_keywords: list[str] = field(default_factory=list)
+    # GEO probe config (per target); empty -> geo_probe skips for this surface.
+    surface_markers: list[str] = field(default_factory=list)
+    namesake_markers: list[str] = field(default_factory=list)
+    geo_probes: list[str] = field(default_factory=list)
+    cite_domains: list[str] = field(default_factory=list)
+
+
+def surface_from_target(target: str) -> Surface | None:
+    """Synthesize a minimal Surface from a raw URL or domain (portable mode).
+
+    URL-only providers (crawl, psi, bing) run with no config; providers that need
+    per-target config (gsc, github, keyword/SERP, GEO probes) skip cleanly. Returns
+    None if the target is not URL/domain-shaped, so the caller can error.
+    """
+    t = target.strip()
+    if "://" not in t:
+        t = "https://" + t
+    host = urlparse(t).netloc
+    if not host or "." not in host:
+        return None
+    return Surface(id=host.replace("www.", ""), url=t)
 
 
 def load_env() -> dict:
