@@ -1,4 +1,4 @@
-"""seo-kit command line: audit a site by URL or surface, list providers, run GSC auth."""
+"""seo-kit command line: set up a repo, audit a site by URL or surface, list providers, run GSC auth."""
 from __future__ import annotations
 
 import argparse
@@ -11,39 +11,76 @@ from rich.markdown import Markdown
 from rich.table import Table
 
 from .audit import run_audit
-from .config import ROOT, load_config, load_env, load_surfaces, surface_from_target
+from .config import LOCAL_CONFIG, ROOT, load_config, load_env, load_local_config, load_surfaces, surface_from_target
 from .providers import REGISTRY
 from .providers.base import TIER_LABEL
 from .report import render_json, render_markdown
+from .setup import git_root, infer_github_repo, infer_url, scaffold_toml
 
 console = Console()
 
 
 def _cmd_audit(args: argparse.Namespace) -> int:
-    config, env, surfaces = load_config(), load_env(), load_surfaces()
-    # Resolve the target: a surfaces.toml id (full per-target config) OR a raw
-    # URL/domain (portable mode: URL-only providers run, config-needing ones skip).
-    surface = surfaces.get(args.target) or surface_from_target(args.target)
+    config, env = load_config(), load_env()
+    local, surfaces = load_local_config(), load_surfaces()
+    local_surfaces = local.surfaces if local else {}
+    # Resolve the target: a per-repo seo-kit.toml id (nearest, wins), a global
+    # surfaces.toml id, OR a raw URL/domain (portable mode: URL-only providers
+    # run, config-needing ones skip).
+    surface = local_surfaces.get(args.target) or surfaces.get(args.target) or surface_from_target(args.target)
     if not surface:
+        known = ", ".join([*local_surfaces, *(k for k in surfaces if k not in local_surfaces)]) or "(none)"
         console.print(
-            f"[red]'{args.target}' is not a surfaces.toml id or a URL.[/] "
-            f"pass a URL (e.g. https://example.com) or one of: {', '.join(surfaces) or '(none)'}"
+            f"[red]'{args.target}' is not a configured surface id or a URL.[/] "
+            f"pass a URL (e.g. https://example.com), run `seo-kit setup` in the target repo, or use one of: {known}"
         )
         return 2
 
     only = args.only.split(",") if args.only else None
+    from_local = args.target in local_surfaces
+    if from_local:
+        console.print(f"[dim]surface from {local.path}[/]")
     console.print(f"[bold]auditing[/] {surface.id} ...")
     report = run_audit(surface, config, env, only=only)
 
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     md = render_markdown(report, config, generated=stamp)
-    out_dir = ROOT / "reports"
-    out_dir.mkdir(exist_ok=True)
-    (out_dir / f"{surface.id}-{stamp}.md").write_text(md)
+    out_dir = local.reports_dir if from_local else ROOT / "reports"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    md_path = out_dir / f"{surface.id}-{stamp}.md"
+    md_path.write_text(md)
     (out_dir / f"{surface.id}-{stamp}.json").write_text(json.dumps(render_json(report), indent=2, default=str))
 
     console.print(Markdown(md))
-    console.print(f"\n[dim]saved reports/{surface.id}-{stamp}.md (+ .json)[/]")
+    console.print(f"\n[dim]saved {md_path} (+ .json)[/]")
+    return 0
+
+
+def _cmd_setup(args: argparse.Namespace) -> int:
+    cwd = Path.cwd()
+    root = git_root(cwd) or cwd
+    dest = root / LOCAL_CONFIG
+    if dest.exists() and not args.force:
+        console.print(f"[yellow]{dest} already exists.[/] edit it directly, or rerun with --force to regenerate.")
+        return 0
+    url = args.url or infer_url(root)
+    if not url:
+        console.print(
+            "[red]could not infer the site url[/] (no CNAME or package.json homepage found). "
+            "pass it: seo-kit setup https://example.com"
+        )
+        return 2
+    synth = surface_from_target(url)
+    if not synth:
+        console.print(f"[red]'{url}' does not look like a URL or domain.[/]")
+        return 2
+    dest.write_text(scaffold_toml(synth.id, synth.url, infer_github_repo(root)))
+    console.print(f"[green]wrote {dest}[/] (surface '{synth.id}')")
+    console.print(
+        "next:\n"
+        f"  1. fill positioning, seed_keywords, and the GEO block in {LOCAL_CONFIG} (from the repo's README/docs)\n"
+        f"  2. seo-kit audit {synth.id}   # reports land in this repo's seo-reports/"
+    )
     return 0
 
 
@@ -74,10 +111,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="seo-kit", description="Real-data SEO + GEO audit toolkit for any site.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    p_audit = sub.add_parser("audit", help="audit a site by URL, or a surfaces.toml id")
-    p_audit.add_argument("target", help="a URL (https://example.com) or a surfaces.toml id (e.g. example.com)")
+    p_audit = sub.add_parser("audit", help="audit a site by URL, or a configured surface id")
+    p_audit.add_argument("target", help="a URL (https://example.com) or a surface id from seo-kit.toml / surfaces.toml")
     p_audit.add_argument("--only", help="comma-separated provider names to run (e.g. crawl,psi)")
     p_audit.set_defaults(func=_cmd_audit)
+
+    p_setup = sub.add_parser("setup", help=f"scaffold {LOCAL_CONFIG} in the current repo (per-repo setup)")
+    p_setup.add_argument("url", nargs="?", help="site url; inferred from CNAME / package.json homepage when omitted")
+    p_setup.add_argument("--force", action="store_true", help=f"overwrite an existing {LOCAL_CONFIG}")
+    p_setup.set_defaults(func=_cmd_setup)
 
     sub.add_parser("providers", help="list providers, tiers, and env readiness").set_defaults(func=_cmd_providers)
 

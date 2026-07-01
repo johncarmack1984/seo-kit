@@ -1,16 +1,19 @@
 ---
 name: seo-kit
-description: Audit and improve SEO + GEO (LLM answer-engine citation) for ANY site using real data. Point it at a URL and it runs providers to produce a prioritized punch list across on-page/technical SEO, Core Web Vitals, structured data, keyword/entity positioning, and whether LLM answer engines surface and correctly identify a person/brand. Use when asked to audit, optimize, or measure a site's search or LLM visibility. Free Tier-0 providers work on any URL with no config; deeper per-target checks add config; paid tiers are opt-in.
+description: Audit and improve SEO + GEO (LLM answer-engine citation) for ANY site using real data. Point it at a URL and it runs providers to produce a prioritized punch list across on-page/technical SEO, Core Web Vitals, structured data, keyword/entity positioning, and whether LLM answer engines surface and correctly identify a person/brand. Use when asked to audit, optimize, or measure a site's search or LLM visibility. Free Tier-0 providers work on any URL with no config; `seo-kit setup` scaffolds per-repo config for full depth; paid tiers are opt-in.
 ---
 
 # seo-kit
 
 A real-data SEO + GEO toolkit you point at any site. It runs a set of providers against a target and produces a prioritized audit. Design rule: the free Tier-0 core does about 80% of the value with no spend, and every paid source is opt-in.
 
-It works in two modes:
+It is modular: the `seo-kit` command is installed globally, machine-level config (secrets, provider enablement) lives in the tool home (this repo), and each audited repo carries its own `seo-kit.toml` — scaffolded by `seo-kit setup` — holding that repo's surface config and report history.
+
+It works in three modes:
 
 - **Portable (zero config):** pass a raw URL. The URL-only providers (`crawl` for on-page + render-gap, `psi` for Core Web Vitals) run immediately and give a universal technical/on-page audit. Providers that need per-target config skip cleanly and tell you what to add, so portable mode never spends even with paid tiers enabled. This is what makes seo-kit a skill you can drop on any repo's site.
-- **Saved surface (full depth):** add the target to `surfaces.toml` with its per-target config (Search Console property, GitHub repo, seed keywords, GEO entity markers/probes). That unlocks the keyword/SERP, Search Console, GitHub, and GEO/LLM-citation providers for that target.
+- **Per-repo (the setup function):** run `seo-kit setup` inside a repo to scaffold `seo-kit.toml` there, then fill its per-target config (Search Console property, GitHub repo, seed keywords, GEO entity markers/probes). That unlocks the keyword/SERP, Search Console, GitHub, and GEO/LLM-citation providers for that repo's site, and its reports land in the repo itself.
+- **Global registry:** targets with no repo of their own (someone else's site, a naming experiment) go in the tool home's `surfaces.toml` with the same fields.
 
 ## When to use
 
@@ -27,10 +30,11 @@ Installed as a global command (`seo-kit`), so it runs from any repo and reads it
 seo-kit providers                         # list providers, tiers, env readiness (no secrets printed)
 seo-kit audit https://example.com         # ANY url: crawl + psi run; config-needing providers skip
 seo-kit audit https://example.com --only crawl   # keyless structural pass only
-seo-kit audit example.com             # a saved surface id: full configured set
+seo-kit setup                             # in a target repo: scaffold its seo-kit.toml (see below)
+seo-kit audit example.com                 # a configured surface id: full set for that target
 ```
 
-The target is a raw URL (portable mode) or a `surfaces.toml` id (saved-surface mode). Reports are written to `reports/<target>-<timestamp>.md` and `.json` in this repo. (Developing in the repo itself? prefix `uv run`.)
+The target is a raw URL (portable mode) or a surface id; ids resolve local-first (the nearest `seo-kit.toml` walking up from cwd, then the tool home's `surfaces.toml`). Reports for a per-repo surface land in that repo's `reports_dir` (default `seo-reports/`); everything else goes to `reports/` in the tool home. (Developing in the tool repo itself? prefix `uv run`.)
 
 One-time setup (from this repo root):
 
@@ -41,9 +45,19 @@ seo-kit auth gsc                                 # one-time Search Console OAuth
 
 The `render` extra (rendered-DOM crawl for the exact JS-gap %) is heavy (Playwright); add it only when needed: reinstall with `".[google,trends,render]"`, then `uv run playwright install chromium`.
 
-## Configuring a target for full depth
+## Per-repo setup (the setup function; run once per repo)
 
-Add a `[[surface]]` to `surfaces.toml`. Only `id` + `url` are required (portable mode, saved). Each extra field unlocks a provider for that target:
+When asked to set up or deeply audit a repo's site, from anywhere inside that repo:
+
+1. `seo-kit setup` — scaffolds `seo-kit.toml` at the repo root. It infers the mechanical fields: `url` from CNAME or package.json homepage (pass it explicitly if inference fails: `seo-kit setup https://example.com`), `github_repo` from the origin remote, and pre-forms `gsc_property` commented out (uncomment once the property is verified in Search Console).
+2. Fill the semantic fields the CLI cannot infer — read the repo (README, docs, positioning notes) and write `positioning`, `seed_keywords`, and the GEO entity block (`surface_markers`, `namesake_markers`, `geo_probes`, `cite_domains`). This is the judgment step: do it, then show the user the file to confirm before spending on keyed providers.
+3. `seo-kit audit <id>` — the id setup printed. Reports land in the repo's `seo-reports/` (configurable via `reports_dir` under `[seokit]`), so the audit history travels with the repo for the Measure phase.
+
+`seo-kit.toml` is safe to commit: it holds no secrets (keys stay in the tool home's `.env`).
+
+## Surface fields (same in seo-kit.toml and surfaces.toml)
+
+Only `id` + `url` are required. Each extra field unlocks a provider for that target:
 
 - `gsc_property` -> Search Console queries (`sc-domain:<domain>` or a URL-prefix property).
 - `github_repo` -> GitHub repo topics / description / traffic signals.
@@ -51,9 +65,15 @@ Add a `[[surface]]` to `surfaces.toml`. Only `id` + `url` are required (portable
 - `surface_markers` + `namesake_markers` + `geo_probes` + `cite_domains` -> the GEO probe (does an answer engine surface this entity, conflate it with a namesake, cite it). Without `surface_markers` + `geo_probes` the GEO probe skips, so it never runs one target's probes against another.
 - `positioning` -> a steer for the content / keyword layer.
 
+## Where config lives (the modular layout)
+
+- Tool home (this repo): `.env` secrets, `config.toml` provider on/off, `secrets/` OAuth token cache, `surfaces.toml` global registry. Machine-level, shared by every target.
+- Each audited repo: `seo-kit.toml` (surfaces + `reports_dir`) and its `seo-reports/`. Repo-level, committed with the repo.
+- Resolution order for `seo-kit audit <target>`: nearest `seo-kit.toml` id -> tool-home `surfaces.toml` id -> raw URL synthesis.
+
 ## Phases (the workflow this skill follows)
 
-1. Instrument - point at a URL (portable), or add a surface for depth (see `.env.example`, `config.toml`, `surfaces.toml`).
+1. Instrument - point at a URL (portable), or run the per-repo setup above for depth (keys: `.env.example`; provider on/off: `config.toml`).
 2. Discover - pull real queries / volumes / trends + an LLM-citation baseline; build the keyword + entity map.
 3. Audit - run the providers; rank findings by impact x effort.
 4. Optimize - apply fixes (titles, schema, prerender, README/profile keywords, internal links, GEO-citable content).

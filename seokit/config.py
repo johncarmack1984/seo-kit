@@ -1,4 +1,10 @@
-"""Loads .env, config.toml, and surfaces.toml from the repo root."""
+"""Config layering: machine-level lives in the tool home, target-level lives with each repo.
+
+Tool home (this repo): .env secrets, config.toml provider enablement, secrets/ token
+caches, surfaces.toml as the global registry. Each audited repo may carry its own
+seo-kit.toml (scaffolded by `seo-kit setup`) with its surfaces + reports_dir; ids
+there win over the global registry.
+"""
 from __future__ import annotations
 
 import os
@@ -10,6 +16,7 @@ from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
+LOCAL_CONFIG = "seo-kit.toml"
 
 
 @dataclass
@@ -64,3 +71,33 @@ def load_config() -> dict:
 def load_surfaces() -> dict[str, Surface]:
     data = _load_toml("surfaces.toml")
     return {s["id"]: Surface(**s) for s in data.get("surface", [])}
+
+
+@dataclass
+class LocalConfig:
+    """A target repo's seo-kit.toml: its surfaces plus where its reports go."""
+
+    path: Path
+    surfaces: dict[str, Surface]
+    reports_dir: Path  # absolute; resolved against the config file's directory
+
+
+def find_local_config(start: Path | None = None) -> Path | None:
+    """Nearest seo-kit.toml walking up from start (default cwd), so the command works from any subdirectory of a set-up repo."""
+    d = (start or Path.cwd()).resolve()
+    for p in (d, *d.parents):
+        candidate = p / LOCAL_CONFIG
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def load_local_config(start: Path | None = None) -> LocalConfig | None:
+    path = find_local_config(start)
+    if not path:
+        return None
+    with path.open("rb") as f:
+        data = tomllib.load(f)
+    surfaces = {s["id"]: Surface(**s) for s in data.get("surface", [])}
+    reports = data.get("seokit", {}).get("reports_dir", "seo-reports")
+    return LocalConfig(path=path, surfaces=surfaces, reports_dir=(path.parent / reports).resolve())
