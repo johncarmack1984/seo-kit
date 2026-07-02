@@ -6,12 +6,12 @@ A real-data SEO and GEO (generative-engine optimization) audit toolkit you point
 2. **Platform-internal search** (GitHub, recruiter search): repo topics, descriptions, keyword hygiene.
 3. **LLM answer engines** (the GEO layer): is the content even readable without JavaScript, and does an LLM surface and correctly identify you.
 
-The guiding rule: the **free Tier-0 core delivers most of the value with zero spend**, and every **paid source is opt-in**. Nothing paid runs, or needs an account, until you turn it on.
+The guiding rule: the free Tier-0 core delivers most of the value with zero spend, and every paid source is opt-in. Nothing paid runs, or needs an account, until you turn it on.
 
 ## Three ways to run it
 
 - **Portable (zero config):** pass a raw URL (`seo-kit audit https://example.com`). The URL-only providers (crawl, psi) run and give a universal technical/on-page audit on any site; the providers that need per-target config skip cleanly, so portable mode never spends. This makes seo-kit a skill you can drop on any repo's site.
-- **Per-repo (modular):** run `seo-kit setup` inside a repo to scaffold `seo-kit.toml` there — url and github_repo are inferred, the semantic fields (positioning, seed keywords, GEO entity markers/probes) are left as commented templates to fill. Its surfaces resolve local-first and its reports land in the repo's own `seo-reports/`, so config and audit history travel with the repo. No secrets in the file; safe to commit.
+- **Per-repo (modular):** run `seo-kit setup` inside a repo to scaffold `seo-kit.toml` there: url and github_repo are inferred, the semantic fields (positioning, seed keywords, GEO entity markers/probes) are left as commented templates to fill. Its surfaces resolve local-first and its reports land in the repo's own `seo-reports/`, so config and audit history travel with the repo. No secrets in the file; safe to commit.
 - **Global registry (tool home):** targets with no repo of their own go in this repo's `surfaces.toml` with the same fields.
 
 ## Why it exists
@@ -60,11 +60,11 @@ seo-kit setup                                   #   scaffold that repo's seo-kit
 seo-kit audit example.com                       #   full configured set; reports -> that repo's seo-reports/
 ```
 
-The crawl provider alone, with no keys, will tell you whether your site is a client-rendered shell that LLM crawlers cannot read, and whether it ships any structured data. That is usually the highest-leverage finding.
+The crawl provider alone, with no keys, will tell you whether your site is a client-rendered shell that LLM crawlers can't read, and whether it ships any structured data. That is usually the highest-leverage finding.
 
 ## Honesty about limits
 
-Search Console lags about two days and only spans 16 months. Keyword volumes from any tool are modeled estimates. LinkedIn has no real SEO API. GEO probe results are non-deterministic and shift with model versions, so they are read as trends across repeated runs, not single answers. SEO feedback loops are weeks to months and confounded; improvements are attributed by trend, not instant causation.
+Search Console lags about two days and only spans 16 months. Keyword volumes from any tool are modeled estimates. LinkedIn has no real SEO API. GEO probe results are non-deterministic and shift with model versions, so they're read as trends across repeated runs, not single answers. SEO feedback loops are weeks to months and confounded; improvements are attributed by trend, not instant causation.
 
 ## License
 
