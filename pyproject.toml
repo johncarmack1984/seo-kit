@@ -23,6 +23,8 @@ all = ["playwright>=1.44", "google-api-python-client>=2.130", "google-auth-oauth
 [project.scripts]
 seo-kit = "seokit.cli:main"
 
+[dependency-groups]
+dev = ["pytest>=8"]
 
 [build-system]
 requires = ["hatchling"]
