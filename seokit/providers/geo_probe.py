@@ -6,10 +6,10 @@ answer about a namesake instead, (c) cited - did a web-grounded engine cite the
 surface. Perplexity is the GEO-relevant one (it searches the web + returns
 citations); the others reflect parametric/training knowledge.
 
-Per-target config comes from the Surface (set in surfaces.toml): surface_markers,
-namesake_markers (optional), geo_probes, cite_domains (optional; defaults to the
-surface domain). With no markers/probes the provider skips, so it never runs one
-target's probes against another.
+Per-target config comes from the Surface (the repo's seo-kit.toml or the tool
+home's surfaces.toml): surface_markers, namesake_markers (optional), geo_probes,
+cite_domains (optional; defaults to the surface domain). With no markers/probes
+the provider skips, so it never runs one target's probes against another.
 
 Cheap models, max_tokens capped, bounded to the surface's probe set. All httpx.
 """
@@ -39,7 +39,7 @@ class GeoProbeProvider(Provider):
         if not markers or not probes:
             res.status = "skipped"
             res.find("low", "geo.no_config",
-                     "set surface_markers + geo_probes on the surface (surfaces.toml) to run GEO probes; skipping.")
+                     "set surface_markers + geo_probes on the surface (seo-kit.toml / surfaces.toml) to run GEO probes; skipping.")
             return res
         namesakes = [m.lower() for m in surface.namesake_markers]
         cite_domains = [d.lower() for d in (surface.cite_domains or [urlparse(surface.url).netloc.replace("www.", "")])]

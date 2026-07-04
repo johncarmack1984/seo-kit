@@ -1,7 +1,8 @@
 [project]
 name = "seo-kit"
 version = "0.1.0"
-description = "Real-data SEO + GEO (LLM-citation) audit toolkit. Free Tier-0 core; paid tiers are opt-in stubs."
+description = "Real-data SEO + GEO (LLM-citation) audit toolkit. Free Tier-0 core; paid tiers opt-in."
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -21,6 +22,7 @@ all = ["playwright>=1.44", "google-api-python-client>=2.130", "google-auth-oauth
 
 [project.scripts]
 seo-kit = "seokit.cli:main"
+
 
 [build-system]
 requires = ["hatchling"]
