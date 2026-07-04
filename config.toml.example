@@ -1,0 +1,24 @@
+# Optional overrides of the built-in provider defaults (Tier 0 on, paid tiers
+# off). Copy to config.toml (gitignored, machine-level) and flip flags there;
+# without a config.toml the defaults shown below apply as-is.
+
+[providers]
+# Tier 0 - free core (default: on). A provider missing its key or per-target
+# config skips cleanly and says what to add.
+crawl  = true
+psi    = true
+gsc    = true
+github = true
+bing   = true
+trends = true
+
+# Tier 1 - SERP position + keyword volume (pay-as-you-go; needs keys in .env)
+dataforseo = false
+serper     = false
+
+# Tier 2 - GEO / LLM citation probes (usage-priced; needs at least one engine key)
+geo_probe = false
+
+# Tier 3 - backlinks + competitor (stubs; implement fetch() to promote)
+ahrefs  = false
+semrush = false

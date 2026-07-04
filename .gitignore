@@ -3,6 +3,9 @@
 secrets/*
 !secrets/.gitkeep
 
+# machine-level provider config - built-in defaults apply without it
+config.toml
+
 # generated audit output
 reports/*
 !reports/.gitkeep

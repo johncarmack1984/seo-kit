@@ -1,9 +1,9 @@
 """Config layering: machine-level lives in the tool home, target-level lives with each repo.
 
-Tool home (this repo): .env secrets, config.toml provider enablement, secrets/ token
-caches, surfaces.toml as the global registry. Each audited repo may carry its own
-seo-kit.toml (scaffolded by `seo-kit setup`) with its surfaces + reports_dir; ids
-there win over the global registry.
+Tool home (this repo): .env secrets, optional config.toml provider overrides,
+secrets/ token caches, surfaces.toml as the global registry. Each audited repo may
+carry its own seo-kit.toml (scaffolded by `seo-kit setup`) with its surfaces +
+reports_dir; ids there win over the global registry.
 """
 from __future__ import annotations
 
@@ -64,8 +64,20 @@ def _load_toml(name: str) -> dict:
         return tomllib.load(f)
 
 
+# Built-in provider defaults: the free Tier-0 core runs everywhere — including a
+# fresh install with no config.toml — and every paid tier is opt-in.
+DEFAULT_PROVIDERS = {
+    "crawl": True, "psi": True, "gsc": True, "github": True, "bing": True, "trends": True,
+    "dataforseo": False, "serper": False, "geo_probe": False,
+    "ahrefs": False, "semrush": False,
+}
+
+
 def load_config() -> dict:
-    return _load_toml("config.toml")
+    """config.toml (tool home) overrides DEFAULT_PROVIDERS per key; absent, defaults apply."""
+    data = _load_toml("config.toml")
+    data["providers"] = {**DEFAULT_PROVIDERS, **data.get("providers", {})}
+    return data
 
 
 def load_surfaces() -> dict[str, Surface]:
