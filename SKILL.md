@@ -1,6 +1,7 @@
 ---
 name: seo-kit
 description: Audit and improve SEO + GEO (LLM answer-engine citation) for ANY site using real data. Point it at a URL and it runs providers to produce a prioritized punch list across on-page/technical SEO, Core Web Vitals, structured data, keyword/entity positioning, and whether LLM answer engines surface and correctly identify a person/brand. Use when asked to audit, optimize, or measure a site's search or LLM visibility. Free Tier-0 providers work on any URL with no config; `seo-kit setup` scaffolds per-repo config for full depth; paid tiers are opt-in.
+compatibility: Requires Python 3.12+ and uv. Provider API keys are optional environment variables (see .env.example); the keyless crawl audit works with none.
 ---
 
 # seo-kit
@@ -41,7 +42,10 @@ One-time setup (from this repo root):
 ```bash
 uv tool install --editable ".[google,trends]"   # the global 'seo-kit' command (editable: tracks this repo's source + keys)
 seo-kit auth gsc                                 # one-time Search Console OAuth consent (caches a token)
+mkdir -p ~/.claude/skills/seo-kit && ln -s "$(pwd)/SKILL.md" ~/.claude/skills/seo-kit/SKILL.md   # register this skill
 ```
+
+Keys are ordinary environment variables (names in `.env.example`): set them in the tool home's `.env`, your shell, or Claude Code's `settings.json` `env` block — already-set variables win over `.env`. Every key is optional; a provider missing its key skips and says what to add.
 
 The `render` extra (rendered-DOM crawl for the exact JS-gap %) is heavy (Playwright); add it only when needed: reinstall with `".[google,trends,render]"`, then `uv run playwright install chromium`.
 
@@ -67,7 +71,7 @@ Only `id` + `url` are required. Each extra field unlocks a provider for that tar
 
 ## Where config lives (the modular layout)
 
-- Tool home (this repo): `.env` secrets, `config.toml` provider on/off, `secrets/` OAuth token cache, `surfaces.toml` global registry. Machine-level, shared by every target.
+- Tool home (this repo): `.env` secrets, optional `config.toml` provider overrides (`cp config.toml.example config.toml`; built-in defaults are Tier 0 on, paid tiers off), `secrets/` OAuth token cache, `surfaces.toml` global registry. Machine-level, shared by every target.
 - Each audited repo: `seo-kit.toml` (surfaces + `reports_dir`) and its `seo-reports/`. Repo-level, committed with the repo.
 - Resolution order for `seo-kit audit <target>`: nearest `seo-kit.toml` id -> tool-home `surfaces.toml` id -> raw URL synthesis.
 
@@ -86,13 +90,11 @@ Only `id` + `url` are required. Each extra field unlocks a provider for that tar
 - Tier 2 (implemented, usage-priced): `geo_probe` - LLM citation + entity-disambiguation; needs the GEO entity config + an engine key (Perplexity/OpenAI/Anthropic/Gemini).
 - Tier 3 (stub): `ahrefs` / `semrush` - backlinks + competitor gap.
 
-## Promoting a stubbed tier
+## Enabling paid tiers
 
-1. Implement the provider's `fetch` (the class docstring + `stub_contract` give the exact API call).
-2. Add its keys to `.env` (mirror to a secrets manager; never commit them).
-3. Flip its flag to `true` in `config.toml`.
+Tiers 1-2 are implemented but off by default. To opt in: add the keys to `.env` (never commit them), then `cp config.toml.example config.toml` (if absent) and flip the tier's flags to `true`.
 
-Until then a stubbed provider raises `ProviderNotEnabled`, and the report lists it under "Available if promoted" with what it would add. Stubbed signals are always labeled, never silently skipped.
+Tier 3 (ahrefs, semrush) is stubbed. To promote one: implement its `fetch` (the class docstring + `stub_contract` give the exact API call), add its key, flip its flag. Until then a stubbed provider raises `ProviderNotEnabled`, and the report lists it under "Available if promoted" with what it would add. Stubbed signals are always labeled, never silently skipped.
 
 ## Limitations (state these in any output)
 

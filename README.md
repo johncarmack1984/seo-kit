@@ -26,14 +26,14 @@ Config is layered: machine-level (secrets, provider enablement, token caches) st
 
 ```
 tool home (this repo)
-  config.toml    which providers run (Tier 0 on; paid tiers opt-in)
+  config.toml    optional overrides of the built-in defaults (Tier 0 on; paid tiers opt-in); gitignored, cp config.toml.example
   surfaces.toml  global registry: targets without a repo of their own
-  .env           secrets (gitignored; mirror to a secrets manager)
+  .env           secrets (gitignored; plain environment variables work too and take precedence)
 each audited repo
   seo-kit.toml   its surfaces + reports_dir (`seo-kit setup` scaffolds it; no secrets, committable)
   seo-reports/   its audit history
 seokit/
-  config.py      surface model + raw-URL synthesis + local-config discovery
+  config.py      surface model + raw-URL synthesis + local-config discovery + provider defaults
   setup.py       per-repo scaffold: infer url/github_repo, template the semantic fields
   providers/     crawl, psi, gsc, github, bing, trends, dataforseo, serper, geo_probe  +  paid stubs
   audit.py       orchestrator
@@ -52,9 +52,8 @@ seokit/
 
 ```bash
 uv sync
-cp .env.example .env                            # fill Tier-0 keys (Search Console OAuth client, PageSpeed, Bing, GitHub)
-uv run seo-kit audit https://example.com        # any URL: crawl + psi run, config-needing providers skip
-uv run seo-kit audit https://example.com --only crawl   # no keys needed for this one
+uv run seo-kit audit https://example.com        # zero keys, zero config: crawl runs, everything else skips and says why
+cp .env.example .env                            # fill the Tier-0 keys you want (PageSpeed, Search Console OAuth client, Bing, GitHub)
 uv tool install --editable ".[google,trends]"   # global command; then, in any repo with a site:
 seo-kit setup                                   #   scaffold that repo's seo-kit.toml (infers url + github repo)
 seo-kit audit example.com                       #   full configured set; reports -> that repo's seo-reports/
@@ -62,9 +61,27 @@ seo-kit audit example.com                       #   full configured set; reports
 
 The crawl provider alone, with no keys, will tell you whether your site is a client-rendered shell that LLM crawlers can't read, and whether it ships any structured data. That is usually the highest-leverage finding.
 
+Provider on/off defaults are built in (Tier 0 on, paid tiers off); to change them, `cp config.toml.example config.toml` and flip flags there. Secrets are ordinary environment variables — `.env` at the tool home is a convenience, and variables already set in your shell win.
+
+## Use it as a Claude Code skill
+
+`SKILL.md` at the repo root is a [Claude Code agent skill](https://code.claude.com/docs/en/skills) that teaches the agent the whole workflow: portable audits, per-repo setup, and reading the reports. Register it as a personal skill by symlinking it from your clone:
+
+```bash
+mkdir -p ~/.claude/skills/seo-kit
+ln -s "$(pwd)/SKILL.md" ~/.claude/skills/seo-kit/SKILL.md
+```
+
+Then "audit example.com for SEO" in any Claude Code session picks it up. A project-scoped copy in a repo's `.claude/skills/seo-kit/` works the same way.
+
 ## Honesty about limits
 
 Search Console lags about two days and only spans 16 months. Keyword volumes from any tool are modeled estimates. LinkedIn has no real SEO API. GEO probe results are non-deterministic and shift with model versions, so they're read as trends across repeated runs, not single answers. SEO feedback loops are weeks to months and confounded; improvements are attributed by trend, not instant causation.
+
+## Roadmap
+
+- Config-home discovery (`SEO_KIT_HOME`, then `~/.config/seo-kit`) so non-editable installs find their `.env`/config; PyPI release once that lands. Today the tool home is the cloned repo, which is why the install is `uv tool install --editable`.
+- Implement the Tier-3 fetches (ahrefs, semrush) behind the existing stub contracts.
 
 ## License
 
