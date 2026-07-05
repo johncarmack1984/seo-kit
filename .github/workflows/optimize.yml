@@ -32,6 +32,11 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           use_commit_signing: true
+          # The signing tool commits to the branch the action checks out; without
+          # these it defaults to main (bounced by the ruleset - caught by the
+          # agent's own re-propose note on its first signed PR).
+          branch_prefix: "optimize/"
+          base_branch: "main"
           settings: |
             {"includeCoAuthoredBy": false}
           prompt: |
