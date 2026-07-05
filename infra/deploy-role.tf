@@ -72,6 +72,7 @@ data "aws_iam_policy_document" "deploy_read" {
     actions = [
       "route53:GetHostedZone",
       "route53:ListHostedZones",
+      "route53:ListHostedZonesByName",
       "route53:ListResourceRecordSets",
       "route53:ListTagsForResource",
       "route53:GetChange",
@@ -99,6 +100,15 @@ data "aws_iam_policy_document" "deploy_read" {
       "cloudfront:DescribeFunction",
       "cloudfront:ListTagsForResource",
     ]
+    resources = ["*"]
+  }
+
+  statement {
+    # The provider data source looks the OIDC provider up BY URL, which lists
+    # all providers before getting the match; list actions are not
+    # resource-scopable.
+    sid       = "IamList"
+    actions   = ["iam:ListOpenIDConnectProviders"]
     resources = ["*"]
   }
 
