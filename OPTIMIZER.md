@@ -63,6 +63,7 @@ Zero new crawl findings against your modified page, or you fix it before opening
 
 - Branch `optimize/YYYY-MM-DD`, title `optimize: <one line>`.
 - Commit hygiene: single-author commits, no `Co-authored-by` trailers, no "Generated with" attribution lines in commit messages. The commit says what changed; identity lives in the author field.
+- **Commit through the signing tool, never raw git.** `git commit` in Bash produces an unsigned commit and fails review on sight. The flow: create and push the branch ref first (`git checkout -b <branch> && git push -u origin <branch>`), edit files in the worktree, then commit every change with `mcp__github_file_ops__commit_files` (and deletions with `mcp__github_file_ops__delete_files`) - the API path GitHub signs. Bash git stays for reading state: status, log, diff.
 - Body: the finding you target (quoted), the change, the metric you expect to move and on what horizon, and the localhost crawl output.
 - A `Reads-after:` line in the log entry - one `metric=YYYY-MM-DD` pair per expected metric, computed from the latency table against the expected merge date (recompute from `git log` if the merge lands later).
 - Append the same four facts to `seo-reports/OPTIMIZER-LOG.md` in the PR (date, target, change, expected movement + horizon). The next run reads this to avoid thrash and to check whether your past predictions came true — note it when they did not.
