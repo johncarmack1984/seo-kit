@@ -80,6 +80,8 @@ seo-kit audits itself. `seo-kit.toml` at the root registers this repo as a surfa
 
 `seo-kit trend seo-kit` turns the report history into the Measure phase: a per-metric table plus a small-multiples SVG (dark/light aware). The graph feeds itself: the self-audit workflow re-runs daily and after every successful deploy, stores each report in the site bucket's `audits/` prefix (no bot commits — `main` takes PRs only), regenerates the SVG from the full history, and publishes it straight to the site. Committed `seo-reports/` are the hand-curated milestones; the embed below shows the milestone copy, the [live one](https://seo-kit.johncarmack.com/trend-seo-kit.svg) updates on its own.
 
+The loop also closes: a scheduled Claude Code run ([OPTIMIZER.md](OPTIMIZER.md)) wakes after each daily audit, reads the findings and the trend, makes at most one measurement-grounded change to the site/docs/probe config, verifies the result against seo-kit's own crawl on localhost, and opens a PR. The branch ruleset means nothing lands without a human merge, and the next day's audit measures whatever did.
+
 ![seo-kit audit trend](seo-reports/trend-seo-kit.svg)
 
 ## Honesty about limits

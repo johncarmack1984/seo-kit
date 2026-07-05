@@ -1,0 +1,36 @@
+name: optimize
+
+# The Optimize phase, automated: a scheduled Claude Code agent wakes an hour
+# after the daily self-audit, follows the doctrine in OPTIMIZER.md (inputs: the
+# fresh audit at /audits/latest.json, the trend history, its own log), makes at
+# most one measurement-grounded change inside its allowed surface, verifies the
+# result against seo-kit's own crawl on localhost, and opens a PR. The branch
+# ruleset guarantees a human merge; the next day's audit measures the outcome.
+# PRs from the default GITHUB_TOKEN don't trigger CI - run ci's
+# workflow_dispatch on the branch when reviewing, or upgrade to the Anthropic
+# GitHub App for auto-triggered checks.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 10 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency: optimize
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@v6
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Read OPTIMIZER.md at the repo root and execute today's optimization pass exactly as it prescribes. Honor its allowed-surface list, its one-change-per-run discipline, and its do-nothing-when-nothing-is-actionable rule. If you act: branch optimize/<today's date>, verify per the doctrine, open the PR, and append your log entry within that same PR.
+          claude_args: "--model claude-sonnet-5 --max-turns 40 --allowedTools Bash,Edit,Write,Read,Glob,Grep"
