@@ -38,12 +38,12 @@ seo-kit trend example.com                 # Measure phase: metric timeseries tab
 
 The target is a raw URL (portable mode) or a surface id; ids resolve local-first (the nearest `seo-kit.toml` walking up from cwd, then the tool home's `surfaces.toml`). Reports for a per-repo surface land in that repo's `reports_dir` (default `seo-reports/`); everything else goes to `reports/` in the tool home. (Developing in the tool repo itself? prefix `uv run`.)
 
-One-time setup (from this repo root):
+One-time setup (the clone is the tool home; run from its root):
 
 ```bash
 uv tool install --editable ".[google,trends]"   # the global 'seo-kit' command (editable: tracks this repo's source + keys)
 seo-kit auth gsc                                 # one-time Search Console OAuth consent (caches a token)
-mkdir -p ~/.claude/skills/seo-kit && ln -s "$(pwd)/SKILL.md" ~/.claude/skills/seo-kit/SKILL.md   # register this skill
+mkdir -p ~/.claude/skills/seo-kit && ln -s "$(pwd)/SKILL.md" ~/.claude/skills/seo-kit/SKILL.md   # register this skill (skip if installed via /plugin)
 ```
 
 Keys are ordinary environment variables (names in `.env.example`): set them in the tool home's `.env`, your shell, or Claude Code's `settings.json` `env` block — already-set variables win over `.env`. Every key is optional; a provider missing its key skips and says what to add.

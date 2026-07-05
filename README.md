@@ -65,14 +65,16 @@ Provider on/off defaults are built in (Tier 0 on, paid tiers off); to change the
 
 ## Use it as a Claude Code skill
 
-`SKILL.md` at the repo root is a [Claude Code agent skill](https://code.claude.com/docs/en/skills) that teaches the agent the whole workflow: portable audits, per-repo setup, and reading the reports. Register it as a personal skill by symlinking it from your clone:
+`SKILL.md` at the repo root is a [Claude Code agent skill](https://code.claude.com/docs/en/skills) that teaches the agent the whole workflow: portable audits, per-repo setup, and reading the reports. The repo is its own [plugin marketplace](https://code.claude.com/docs/en/plugin-marketplaces), so installing is two commands inside Claude Code:
 
-```bash
-mkdir -p ~/.claude/skills/seo-kit
-ln -s "$(pwd)/SKILL.md" ~/.claude/skills/seo-kit/SKILL.md
+```
+/plugin marketplace add johncarmack1984/seo-kit
+/plugin install seo-kit@seo-kit
 ```
 
-Then "audit example.com for SEO" in any Claude Code session picks it up. A project-scoped copy in a repo's `.claude/skills/seo-kit/` works the same way.
+Then "audit example.com for SEO" in any session picks it up; `/plugin update seo-kit@seo-kit` pulls the latest (versions track main). The engine still lives in a clone - the skill's one-time setup covers `uv tool install --editable` from it, and keys stay in that clone's `.env`.
+
+No plugin support? The manual registration works the same as ever: symlink `SKILL.md` into `~/.claude/skills/seo-kit/`, or drop a project-scoped copy in a repo's `.claude/skills/seo-kit/`.
 
 ## Dogfooding
 
