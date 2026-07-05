@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>seo-kit - real-data SEO + GEO audit CLI</title>
+<meta name="description" content="A free, open-source CLI that audits any site with real data: on-page SEO, Core Web Vitals, structured data, and whether LLM answer engines surface you correctly.">
+<link rel="canonical" href="https://seo-kit.johncarmack.com/">
+<meta property="og:title" content="seo-kit - real-data SEO + GEO audit CLI">
+<meta property="og:description" content="Point it at a URL. It runs real providers and returns a ranked punch list, including whether LLM answer engines can read and cite the site.">
+<meta property="og:url" content="https://seo-kit.johncarmack.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="seo-kit">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="seo-kit - real-data SEO + GEO audit CLI">
+<meta name="twitter:description" content="Free Tier-0 audits on any URL with zero config. Paid data sources are opt-in.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23151312'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23d99a2b' stroke-width='2.5'/%3E%3Cline x1='19.5' y1='19.5' x2='26' y2='26' stroke='%23d99a2b' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "seo-kit",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "macOS, Linux, Windows",
+      "description": "Real-data SEO and GEO (generative-engine optimization) audit toolkit. Free Tier-0 core; paid tiers opt-in.",
+      "url": "https://seo-kit.johncarmack.com/",
+      "license": "https://opensource.org/license/mit",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": {
+        "@type": "Person",
+        "name": "John Carmack",
+        "alternateName": "johncarmack1984",
+        "url": "https://johncarmack.com/",
+        "sameAs": ["https://github.com/johncarmack1984"]
+      }
+    },
+    {
+      "@type": "WebSite",
+      "name": "seo-kit",
+      "url": "https://seo-kit.johncarmack.com/"
+    }
+  ]
+}
+</script>
+<style>
+:root {
+  --bg: #faf9f7;
+  --bg-raise: #f1efec;
+  --ink: #21201d;
+  --ink-soft: #5c584f;
+  --line: #e0ddd6;
+  --accent: #a36a10;
+  --accent-ink: #fff;
+  --code-bg: #151312;
+  --code-ink: #d6d2c9;
+  --code-soft: #8a857a;
+  --sev-high: #e05c50;
+  --sev-med: #d99a2b;
+  --sev-low: #8a857a;
+  --sev-ok: #6cae7d;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151312;
+    --bg-raise: #1d1b19;
+    --ink: #e8e5de;
+    --ink-soft: #a29c90;
+    --line: #2e2b27;
+    --accent: #d99a2b;
+    --accent-ink: #151312;
+    --code-bg: #100f0e;
+    --code-ink: #d6d2c9;
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main, footer { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+code, pre, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+header { padding: 5rem 0 3.5rem; border-bottom: 1px solid var(--line); }
+.wrap { max-width: 60rem; margin: 0 auto; padding: 0 1.25rem; }
+h1 {
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  max-width: 21ch;
+}
+.sub { margin-top: 1rem; color: var(--ink-soft); max-width: 46ch; font-size: 1.1rem; }
+.cta-row { margin-top: 1.75rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.btn {
+  display: inline-block; padding: 0.6rem 1.1rem; border-radius: 8px;
+  text-decoration: none; font-weight: 600; font-size: 0.95rem;
+  border: 1px solid var(--line); color: var(--ink);
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+section { padding: 3.25rem 0; border-bottom: 1px solid var(--line); }
+h2 { font-size: 1.35rem; letter-spacing: -0.01em; margin-bottom: 1.25rem; }
+p + p { margin-top: 0.8rem; }
+
+.term {
+  background: var(--code-bg); color: var(--code-ink);
+  border-radius: 8px; padding: 1.1rem 1.25rem; overflow-x: auto;
+  font-size: 0.83rem; line-height: 1.7;
+}
+.term .cmd { color: #fff; font-weight: 600; }
+.term .dim { color: var(--code-soft); }
+.term .hi { color: var(--sev-high); }
+.term .md { color: var(--sev-med); }
+.term .lo { color: var(--sev-low); }
+.term-note { margin-top: 0.6rem; color: var(--ink-soft); font-size: 0.85rem; }
+
+.aud { border-top: 1px solid var(--line); padding: 1.1rem 0; display: grid; grid-template-columns: 14rem 1fr; gap: 0.5rem 2rem; }
+.aud:last-of-type { border-bottom: 1px solid var(--line); }
+.aud h3 { font-size: 1rem; }
+.aud p { color: var(--ink-soft); font-size: 0.95rem; }
+@media (max-width: 640px) { .aud { grid-template-columns: 1fr; } }
+
+.tiers { margin-top: 1rem; color: var(--ink-soft); font-size: 0.95rem; max-width: 65ch; }
+
+pre.shell {
+  background: var(--bg-raise); border: 1px solid var(--line); border-radius: 8px;
+  padding: 1rem 1.25rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.8;
+}
+pre.shell .c { color: var(--ink-soft); }
+
+.limits p { color: var(--ink-soft); max-width: 65ch; }
+
+footer { padding: 2.5rem 1.25rem; color: var(--ink-soft); font-size: 0.9rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Real-data SEO and GEO audits for any site</h1>
+    <p class="sub">seo-kit is a free, open-source CLI that measures how search crawlers and LLM answer engines actually see a site.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/johncarmack1984/seo-kit">View on GitHub</a>
+      <a class="btn" href="#quickstart">Quickstart</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section aria-label="Example audit output">
+  <pre class="term"><span class="cmd">$ seo-kit audit https://example.com</span>
+<span class="dim">auditing example.com ...</span>
+
+Findings (ranked)
+
+  <span class="hi">[HIGH]</span> crawl:schema.missing      No JSON-LD structured data in server HTML
+                                   (no Person/Organization entity for Google or LLMs).
+  <span class="hi">[HIGH]</span> crawl:render.thin_shell   Server HTML has only 21 words of text.
+                                   Non-JS crawlers and most LLM bots see almost nothing.
+  <span class="md">[MED]</span>  crawl:description.missing No meta description.
+  <span class="md">[MED]</span>  crawl:sitemap.missing     No /sitemap.xml (200).
+  <span class="lo">[LOW]</span>  crawl:canonical.missing   No rel=canonical link.
+
+<span class="dim">saved seo-reports/example.com-20260705T000345Z.md (+ .json)</span></pre>
+  <p class="term-note">Real output from the keyless crawl pass. No API keys, no config, any URL.</p>
+</section>
+
+<section>
+  <h2>One audit, three audiences</h2>
+  <div class="aud">
+    <h3>Search crawlers</h3>
+    <p>Titles, meta, canonical, structured data, sitemaps, robots, and Core Web Vitals from the PageSpeed API. Search Console queries once the property is connected.</p>
+  </div>
+  <div class="aud">
+    <h3>Platform-internal search</h3>
+    <p>GitHub repo topics, descriptions, and traffic signals. The searches that happen inside platforms, where classic SEO tooling never looks.</p>
+  </div>
+  <div class="aud">
+    <h3>LLM answer engines</h3>
+    <p>The GEO layer: is the content readable without JavaScript, does it ship an entity for the model to cite, and do answer engines surface you or a namesake?</p>
+  </div>
+  <p class="tiers">Every data source is a provider behind one interface. The free Tier-0 core (crawl, PageSpeed, Search Console, GitHub, Bing, Trends) does most of the work; SERP position, keyword volume, and LLM citation probes are opt-in paid tiers. Nothing paid runs until you turn it on.</p>
+</section>
+
+<section id="quickstart">
+  <h2>Quickstart</h2>
+  <pre class="shell">git clone https://github.com/johncarmack1984/seo-kit && cd seo-kit
+uv sync
+uv run seo-kit audit https://example.com   <span class="c"># zero keys: crawl runs, the rest skip and say why</span>
+uv tool install --editable .               <span class="c"># global command; then, in any repo with a site:</span>
+seo-kit setup                              <span class="c"># scaffold that repo's seo-kit.toml</span>
+seo-kit audit example.com                  <span class="c"># full configured set; reports live with the repo</span></pre>
+  <p class="tiers">This page is part of the loop: the repo carries its own <code>seo-kit.toml</code>, this site is its registered surface, and the audit history is committed alongside the code.</p>
+</section>
+
+<section class="limits">
+  <h2>Honesty about limits</h2>
+  <p>Search Console lags about two days and spans 16 months. Keyword volumes from any tool are modeled estimates, not truth. GEO probe results are non-deterministic and shift with model versions, so they are read as trends across repeated runs, not single answers.</p>
+  <p>SEO feedback loops are weeks to months and confounded. seo-kit attributes improvement by trend and never invents a metric it did not measure.</p>
+</section>
+
+</main>
+
+<footer>
+  <span>MIT license</span>
+  <a href="https://github.com/johncarmack1984/seo-kit">github.com/johncarmack1984/seo-kit</a>
+  <a href="https://johncarmack.com/">johncarmack.com</a>
+</footer>
+
+</body>
+</html>

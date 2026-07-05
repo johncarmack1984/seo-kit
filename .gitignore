@@ -20,3 +20,10 @@ dist/
 
 # playwright browser cache (if installed into project)
 .cache/
+
+# terraform (state lives in the remote backend)
+infra/.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
+crash.log
