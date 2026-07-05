@@ -6,9 +6,8 @@ name: optimize
 # most one measurement-grounded change inside its allowed surface, verifies the
 # result against seo-kit's own crawl on localhost, and opens a PR. The branch
 # ruleset guarantees a human merge; the next day's audit measures the outcome.
-# PRs from the default GITHUB_TOKEN don't trigger CI - run ci's
-# workflow_dispatch on the branch when reviewing, or upgrade to the Anthropic
-# GitHub App for auto-triggered checks.
+# Identity: the Claude GitHub App (must be installed on this repo) - the agent's
+# commits and PRs are authored by claude[bot], and its PRs trigger CI normally.
 
 on:
   workflow_dispatch:
@@ -19,6 +18,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  id-token: write  # OIDC exchange for the Claude GitHub App's token
 
 concurrency: optimize
 
@@ -35,10 +35,6 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          # Explicit token skips the action's OIDC/GitHub-App token exchange
-          # (needs id-token permission + the Claude App installed). Trade-off,
-          # documented above: PRs from this token don't auto-trigger CI.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           prompt: |
             Read OPTIMIZER.md at the repo root and execute today's optimization pass exactly as it prescribes. Honor its allowed-surface list, its one-change-per-run discipline, and its do-nothing-when-nothing-is-actionable rule. If you act: branch optimize/<today's date>, verify per the doctrine, open the PR, and append your log entry within that same PR.
           claude_args: "--model claude-sonnet-5 --max-turns 40 --allowedTools Bash,Edit,Write,Read,Glob,Grep"
