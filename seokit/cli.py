@@ -99,20 +99,26 @@ def _cmd_trend(args: argparse.Namespace) -> int:
         console.print(f"[red]'{args.target}' is not a configured surface id or a URL.[/]")
         return 2
     from_local = args.target in local_surfaces
-    reports_dir = local.reports_dir if from_local else ROOT / "reports"
+    if args.reports_dir:
+        reports_dir = Path(args.reports_dir)
+    else:
+        reports_dir = local.reports_dir if from_local else ROOT / "reports"
     snaps = load_series(reports_dir, surface.id)
     if not snaps:
         console.print(f"[yellow]no reports for '{surface.id}' in {reports_dir}[/] - run `seo-kit audit {surface.id}` first.")
         return 1
 
-    t = Table(title=f"audit trend - {surface.id} ({len(snaps)} audits)")
+    # The SVG plots everything; the table shows the newest handful.
+    shown = snaps[-8:]
+    title = f"audit trend - {surface.id} ({len(snaps)} audits" + (f", last {len(shown)} shown" if len(shown) < len(snaps) else "") + ")"
+    t = Table(title=title)
     t.add_column("metric")
-    for s in snaps:
+    for s in shown:
         t.add_column(s.stamp.strftime("%m-%d %H:%M"), justify="right")
     for key, label in METRICS:
         if not any(key in s.metrics for s in snaps):
             continue
-        vals = [("-" if key not in s.metrics else f"{s.metrics[key]:g}") for s in snaps]
+        vals = [("-" if key not in s.metrics else f"{s.metrics[key]:g}") for s in shown]
         t.add_row(label, *vals)
     console.print(t)
 
@@ -162,6 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     p_trend = sub.add_parser("trend", help="metric timeseries across a surface's report history (table + SVG)")
     p_trend.add_argument("target", help="a surface id with committed reports (or a URL audited before)")
     p_trend.add_argument("--out", help="SVG output path (default: reports_dir/trend-<id>.svg)")
+    p_trend.add_argument("--reports-dir", help="read report history from this directory instead of the resolved one (CI: a synced S3 prefix)")
     p_trend.set_defaults(func=_cmd_trend)
 
     sub.add_parser("providers", help="list providers, tiers, and env readiness").set_defaults(func=_cmd_providers)
