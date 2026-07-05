@@ -11,7 +11,7 @@ id = "seo-kit"
 url = "https://seo-kit.johncarmack.com/"
 kind = "site"
 github_repo = "johncarmack1984/seo-kit"
-# gsc_property = "sc-domain:seo-kit.johncarmack.com"
+gsc_property = "sc-domain:seo-kit.johncarmack.com"
 positioning = "Real-data SEO + GEO audit CLI: free Tier-0 core, paid tiers opt-in, honest about limits; measures LLM citation and namesake disambiguation, not just rankings"
 seed_keywords = [
     "generative engine optimization tool",

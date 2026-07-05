@@ -200,6 +200,12 @@ seo-kit audit example.com                  <span class="c"># full configured set
   <p class="tiers">This page is part of the loop: the repo carries its own <code>seo-kit.toml</code>, this site is its registered surface, and the audit history is committed alongside the code.</p>
 </section>
 
+<section aria-label="Audit trend">
+  <h2>Measured, in public</h2>
+  <p class="tiers">seo-kit audits itself and commits the reports. Every point below is from this site's own audit history; <code>seo-kit trend</code> regenerates the graph and it redeploys with the repo.</p>
+  <img src="/trend-seo-kit.svg" alt="Small-multiple line charts of seo-kit's own audit metrics over time: PageSpeed score, GEO probe results, SERP rankings, Search Console clicks and impressions, GitHub stars and views." style="width:100%;height:auto;margin-top:1.25rem" loading="lazy">
+</section>
+
 <section class="limits">
   <h2>Honesty about limits</h2>
   <p>Search Console lags about two days and spans 16 months. Keyword volumes from any tool are modeled estimates, not truth. GEO probe results are non-deterministic and shift with model versions, so they are read as trends across repeated runs, not single answers.</p>
