@@ -32,6 +32,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           use_commit_signing: true
+          settings: |
+            {"includeCoAuthoredBy": false}
           prompt: |
             Read OPTIMIZER.md at the repo root and execute today's optimization pass exactly as it prescribes. Honor its allowed-surface list, its one-change-per-run discipline, and its do-nothing-when-nothing-is-actionable rule. If you act: branch optimize/<today's date>, verify per the doctrine, open the PR, and append your log entry within that same PR.
           claude_args: "--model claude-sonnet-5 --max-turns 40 --allowedTools Bash,Edit,Write,Read,Glob,Grep"
