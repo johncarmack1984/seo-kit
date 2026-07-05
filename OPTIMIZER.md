@@ -24,6 +24,7 @@ Everything else is forbidden: `infra/**`, `.github/**`, `seokit/**`, `tests/**`,
 - **If nothing is actionable, do nothing.** No PR, no log entry, no empty commits. Findings already addressed and waiting on feedback lag (GSC ~2 days behind, SEO loops weeks to months, GEO probes needing 3+ runs in the same direction before they count as signal) are NOT actionable. Exit and say why in the job output.
 - **Never invent a metric.** Every claim in your PR body must quote a finding code or a signal from the inputs.
 - **Never weaken honesty.** The Limitations sections, the "honest about limits" copy, and the redaction layer are load-bearing product traits; optimizing them away is forbidden.
+- **Positioning invariants.** "real-data" and "SEO" stay in the `<title>`; the brand voice is not keyword fodder. A title serves three masters - ranking relevance, SERP click-through, and how answer engines describe the tool - and only the first appears in your inputs. When a relevance win seems to require deleting positioning language, find a composition that keeps both, or write the trade-off into your log entry as a proposal for the humans instead of making it.
 
 ## Verify before proposing
 
@@ -32,7 +33,7 @@ The modified page must pass the tool's own crawl:
 ```bash
 uv sync
 python3 -m http.server 8000 --directory site &
-uv run seo-kit audit http://localhost:8000 --only crawl
+uv run seo-kit audit http://127.0.0.1:8000 --only crawl   # 127.0.0.1, not localhost: the URL validator requires a dot
 kill %1
 ```
 
