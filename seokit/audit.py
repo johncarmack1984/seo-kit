@@ -23,6 +23,10 @@ def run_audit(surface: Surface, config: dict, env: dict, only: list[str] | None 
             continue
         if not enabled.get(name, False):
             continue
+        # Per-surface allowlist works like per-surface enablement: outside it, a
+        # provider doesn't run even if named in --only.
+        if surface.providers and name not in surface.providers:
+            continue
         prov = cls(config, env)
         try:
             res = prov.fetch(surface)

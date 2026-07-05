@@ -79,6 +79,7 @@ kind = "site"
 # Each field below unlocks a provider for this target; fill what applies.
 # gsc_property = "sc-domain:{surface_id}"  # Search Console queries; uncomment once the property is verified
 {gh_line}  # GitHub repo topics / description / traffic signals
+# providers = []  # optional allowlist: only these run for this surface (e.g. a repo-only surface: ["crawl", "github", "trends", "geo_probe"])
 # positioning = ""  # one-line steer for the content + keyword layer
 # seed_keywords = []  # unlocks trends (free) + dataforseo volume / serper SERP position (keyed)
 

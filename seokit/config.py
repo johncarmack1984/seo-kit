@@ -28,6 +28,10 @@ class Surface:
     github_repo: str | None = None
     positioning: str = ""
     seed_keywords: list[str] = field(default_factory=list)
+    # Optional allowlist: only these providers apply to this surface (a repo-only
+    # surface keeps site-only providers like psi/gsc out). Empty -> no restriction;
+    # machine-level enablement still applies either way.
+    providers: list[str] = field(default_factory=list)
     # GEO probe config (per target); empty -> geo_probe skips for this surface.
     surface_markers: list[str] = field(default_factory=list)
     namesake_markers: list[str] = field(default_factory=list)

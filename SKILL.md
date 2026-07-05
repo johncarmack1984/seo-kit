@@ -65,6 +65,7 @@ Only `id` + `url` are required. Each extra field unlocks a provider for that tar
 
 - `gsc_property` -> Search Console queries (`sc-domain:<domain>` or a URL-prefix property).
 - `github_repo` -> GitHub repo topics / description / traffic signals.
+- `providers` -> optional allowlist: only these providers apply to this surface (a repo-only surface keeps site-only providers like `psi`/`gsc` out). Empty = no restriction. Outside the allowlist a provider doesn't run even if named in `--only`.
 - `seed_keywords` -> keyword volume (`dataforseo`), SERP position (`serper`), interest over time (`trends`).
 - `surface_markers` + `namesake_markers` + `geo_probes` + `cite_domains` -> the GEO probe (does an answer engine surface this entity, conflate it with a namesake, cite it). Without `surface_markers` + `geo_probes` the GEO probe skips, so it never runs one target's probes against another.
 - `positioning` -> a steer for the content / keyword layer.

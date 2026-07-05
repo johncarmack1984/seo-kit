@@ -63,6 +63,14 @@ def test_disabled_and_only_filters(monkeypatch):
     assert [r.provider for r in only_fine.results] == ["fine"]
 
 
+def test_surface_provider_allowlist(monkeypatch):
+    _patch_registry(monkeypatch, BoomProvider, FineProvider)
+    surf = Surface(id="x.com", url="https://x.com/", providers=["fine"])
+    assert [r.provider for r in run_audit(surf, ENABLED, env={}).results] == ["fine"]
+    # outside the allowlist, --only cannot force a provider in
+    assert run_audit(surf, ENABLED, env={}, only=["boom"]).results == []
+
+
 def test_markdown_ranks_findings_and_labels_stubs(monkeypatch):
     _patch_registry(monkeypatch, FineProvider, StubbyProvider)
     report = run_audit(SURFACE, ENABLED, env={})
