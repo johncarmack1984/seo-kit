@@ -1,0 +1,93 @@
+{
+  "surface": {
+    "id": "seo-kit",
+    "url": "https://seo-kit.johncarmack.com/",
+    "kind": "site",
+    "gsc_property": null,
+    "github_repo": "johncarmack1984/seo-kit",
+    "positioning": "Real-data SEO + GEO audit CLI: free Tier-0 core, paid tiers opt-in, honest about limits; measures LLM citation and namesake disambiguation, not just rankings",
+    "seed_keywords": [
+      "generative engine optimization tool",
+      "GEO audit tool",
+      "LLM SEO audit",
+      "AI search visibility audit",
+      "open source SEO audit CLI"
+    ],
+    "providers": [],
+    "surface_markers": [
+      "johncarmack1984",
+      "seo-kit.johncarmack.com"
+    ],
+    "namesake_markers": [
+      "wordpress",
+      "rank math",
+      "yoast",
+      "woocommerce"
+    ],
+    "geo_probes": [
+      "What open-source tools audit GEO (generative engine optimization) - whether LLM answer engines cite a site?",
+      "Is there a CLI that checks whether a site is readable by LLM crawlers and measures its JS render gap?",
+      "What is seo-kit by johncarmack1984 on GitHub?",
+      "Name tools that combine Search Console and PageSpeed data with LLM citation probes.",
+      "What tools measure whether ChatGPT or Perplexity surface a person or brand correctly?"
+    ],
+    "cite_domains": [
+      "seo-kit.johncarmack.com",
+      "github.com/johncarmack1984/seo-kit"
+    ]
+  },
+  "results": [
+    {
+      "provider": "github",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "description",
+          "value": "Real-data SEO + GEO (LLM-citation) audit toolkit. Free Tier-0 core; paid tiers opt-in.",
+          "note": ""
+        },
+        {
+          "key": "topics",
+          "value": [
+            "cli",
+            "core-web-vitals",
+            "generative-engine-optimization",
+            "geo",
+            "llm",
+            "python",
+            "seo",
+            "seo-audit",
+            "structured-data"
+          ],
+          "note": ""
+        },
+        {
+          "key": "stars",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "homepage",
+          "value": "https://seo-kit.johncarmack.com/",
+          "note": ""
+        },
+        {
+          "key": "views_14d",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "uniques_14d",
+          "value": 0,
+          "note": ""
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    }
+  ]
+}
