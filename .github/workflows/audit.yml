@@ -46,6 +46,12 @@ jobs:
           mkdir -p ci-history
           aws s3 sync s3://seo-kit-johncarmack-com/audits/ ci-history/ --exclude "*" --include "*.json"
           cp -f seo-reports/*.json ci-history/ 2>/dev/null || true
+      # A fresh checkout has no config.toml, so the built-in defaults apply and
+      # the paid tiers stay off - which silently dropped serper + geo_probe from
+      # every CI run (--only filters WITHIN enabled providers). The runner is a
+      # machine; here is its machine-level config. dataforseo stays off in CI.
+      - name: Enable CI provider tiers
+        run: printf '[providers]\nserper = true\ngeo_probe = true\n' > config.toml
       - name: Audit the live surface
         env:
           GITHUB_TOKEN: ${{ github.token }}
