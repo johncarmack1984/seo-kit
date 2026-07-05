@@ -62,6 +62,9 @@ jobs:
           cp -f "$new" ci-history/
           uv run seo-kit trend seo-kit --reports-dir ci-history --out trend-seo-kit.svg
           aws s3 cp "$new" "s3://seo-kit-johncarmack-com/audits/$(basename "$new")"
+          # Stable name so the optimizer (and anyone) can fetch today's audit through CloudFront.
+          aws s3 cp "$new" "s3://seo-kit-johncarmack-com/audits/latest.json" \
+            --cache-control "public, max-age=900" --content-type application/json
           aws s3 cp trend-seo-kit.svg s3://seo-kit-johncarmack-com/trend-seo-kit.svg \
             --cache-control "public, max-age=3600" --content-type image/svg+xml
           aws cloudfront create-invalidation \
