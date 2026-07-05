@@ -84,8 +84,11 @@ jobs:
       - name: Sync site to S3
         run: |
           # index.html always revalidates; the other root files stay refreshable.
+          # audits/ is CI-owned data, not site content: exclude it or --delete
+          # wipes it on every deploy (masked until now by the post-deploy
+          # self-audit repopulating latest.json minutes later).
           aws s3 sync site/ s3://seo-kit-johncarmack-com --delete \
-            --exclude index.html \
+            --exclude index.html --exclude "audits/*" \
             --cache-control "public, max-age=3600"
           aws s3 cp site/index.html s3://seo-kit-johncarmack-com/index.html \
             --cache-control "no-cache"
