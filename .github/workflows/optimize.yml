@@ -25,6 +25,10 @@ concurrency: optimize
 jobs:
   optimize:
     runs-on: ubuntu-latest
+    env:
+      # The agent files its own PR with `gh`; the action wires git credentials
+      # but not the gh CLI. Superseded by the App-token path when #5 lands.
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: astral-sh/setup-uv@v6
