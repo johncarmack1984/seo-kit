@@ -1,27 +1,71 @@
 name: self-audit
 
-# Dogfood: run the keyless slice of seo-kit against its own surface. Manual
-# trigger + monthly; the report uploads as an artifact (no bot commits — the
-# committed history in seo-reports/ is curated by hand).
+# Dogfood cadence: the trend feeds itself. Runs daily, after every successful
+# deploy, and on demand. The fresh report lands in the site bucket's audits/
+# prefix — not in git (main requires PRs; committed seo-reports/ stay
+# hand-curated milestones) — then the trend SVG is regenerated from the FULL
+# history (S3 + committed) and pushed straight to the bucket with an
+# invalidation, so the site's graph updates without a repo change. Providers
+# join the run as their keys appear in Actions secrets; an absent key is a
+# clean skip, so the audit deepens as secrets are added.
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 6 1 * *"
+    - cron: "23 9 * * *"
+  workflow_run:
+    workflows: [deploy]
+    types: [completed]
 
 permissions:
   contents: read
 
+concurrency: self-audit
+
 jobs:
   audit:
+    # For workflow_run, only chase a successful deploy of main.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: astral-sh/setup-uv@v6
       - run: uv sync
-      - run: uv run seo-kit audit seo-kit --only crawl,github
+      - uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Pull audit history (S3 runs + committed milestones)
+        run: |
+          mkdir -p ci-history
+          aws s3 sync s3://seo-kit-johncarmack-com/audits/ ci-history/ --exclude "*" --include "*.json"
+          cp -f seo-reports/*.json ci-history/ 2>/dev/null || true
+      - name: Audit the live surface
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: uv run seo-kit audit seo-kit --only crawl,psi,github,serper,geo_probe
+      - name: Publish report + regenerated trend to the bucket
+        run: |
+          new=$(ls -t seo-reports/seo-kit-*.json | head -1)
+          cp -f "$new" ci-history/
+          uv run seo-kit trend seo-kit --reports-dir ci-history --out trend-seo-kit.svg
+          aws s3 cp "$new" "s3://seo-kit-johncarmack-com/audits/$(basename "$new")"
+          aws s3 cp trend-seo-kit.svg s3://seo-kit-johncarmack-com/trend-seo-kit.svg \
+            --cache-control "public, max-age=3600" --content-type image/svg+xml
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.DISTRIBUTION_ID }} --paths "/trend-seo-kit.svg"
       - uses: actions/upload-artifact@v4
         with:
           name: seo-report
