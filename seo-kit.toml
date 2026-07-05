@@ -18,7 +18,6 @@ seed_keywords = [
     "GEO audit tool",
     "LLM SEO audit",
     "AI search visibility audit",
-    "open source SEO audit CLI",
 ]
 
 # GEO probe: does an answer engine surface THIS seo-kit, or a namesake ("SEO kit"
