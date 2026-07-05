@@ -1,0 +1,28 @@
+name: self-audit
+
+# Dogfood: run the keyless slice of seo-kit against its own surface. Manual
+# trigger + monthly; the report uploads as an artifact (no bot commits — the
+# committed history in seo-reports/ is curated by hand).
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync
+      - run: uv run seo-kit audit seo-kit --only crawl,github
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-report
+          path: seo-reports/
