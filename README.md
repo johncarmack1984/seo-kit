@@ -78,6 +78,10 @@ Then "audit example.com for SEO" in any Claude Code session picks it up. A proje
 
 seo-kit audits itself. `seo-kit.toml` at the root registers this repo as a surface — the same file `seo-kit setup` scaffolds, filled in for real — with the project site ([seo-kit.johncarmack.com](https://seo-kit.johncarmack.com/), S3 + CloudFront, Terraform in `infra/`) as the URL and this repo as the GitHub layer. `seo-kit audit seo-kit` from anywhere in the repo; history lands in `seo-reports/`. The first self-audit forced a feature (per-surface `providers` allowlists), and the site in `site/` has to pass the crawl checks it ships.
 
+`seo-kit trend seo-kit` turns that committed history into the Measure phase: a per-metric table plus a small-multiples SVG (dark/light aware) that the site publishes.
+
+![seo-kit audit trend](seo-reports/trend-seo-kit.svg)
+
 ## Honesty about limits
 
 Search Console lags about two days and only spans 16 months. Keyword volumes from any tool are modeled estimates. LinkedIn has no real SEO API. GEO probe results are non-deterministic and shift with model versions, so they're read as trends across repeated runs, not single answers. SEO feedback loops are weeks to months and confounded; improvements are attributed by trend, not instant causation.

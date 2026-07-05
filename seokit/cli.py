@@ -89,6 +89,39 @@ def _cmd_setup(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_trend(args: argparse.Namespace) -> int:
+    from .trend import METRICS, load_series, render_svg
+
+    local, surfaces = load_local_config(), load_surfaces()
+    local_surfaces = local.surfaces if local else {}
+    surface = local_surfaces.get(args.target) or surfaces.get(args.target) or surface_from_target(args.target)
+    if not surface:
+        console.print(f"[red]'{args.target}' is not a configured surface id or a URL.[/]")
+        return 2
+    from_local = args.target in local_surfaces
+    reports_dir = local.reports_dir if from_local else ROOT / "reports"
+    snaps = load_series(reports_dir, surface.id)
+    if not snaps:
+        console.print(f"[yellow]no reports for '{surface.id}' in {reports_dir}[/] - run `seo-kit audit {surface.id}` first.")
+        return 1
+
+    t = Table(title=f"audit trend - {surface.id} ({len(snaps)} audits)")
+    t.add_column("metric")
+    for s in snaps:
+        t.add_column(s.stamp.strftime("%m-%d %H:%M"), justify="right")
+    for key, label in METRICS:
+        if not any(key in s.metrics for s in snaps):
+            continue
+        vals = [("-" if key not in s.metrics else f"{s.metrics[key]:g}") for s in snaps]
+        t.add_row(label, *vals)
+    console.print(t)
+
+    out = Path(args.out) if args.out else reports_dir / f"trend-{surface.id}.svg"
+    out.write_text(render_svg(snaps, surface.id))
+    console.print(f"[dim]wrote {out}[/]")
+    return 0
+
+
 def _cmd_providers(args: argparse.Namespace) -> int:
     config, env = load_config(), load_env()
     enabled = config.get("providers", {})
@@ -125,6 +158,11 @@ def main(argv: list[str] | None = None) -> int:
     p_setup.add_argument("url", nargs="?", help="site url; inferred from CNAME / package.json homepage when omitted")
     p_setup.add_argument("--force", action="store_true", help=f"overwrite an existing {LOCAL_CONFIG}")
     p_setup.set_defaults(func=_cmd_setup)
+
+    p_trend = sub.add_parser("trend", help="metric timeseries across a surface's report history (table + SVG)")
+    p_trend.add_argument("target", help="a surface id with committed reports (or a URL audited before)")
+    p_trend.add_argument("--out", help="SVG output path (default: reports_dir/trend-<id>.svg)")
+    p_trend.set_defaults(func=_cmd_trend)
 
     sub.add_parser("providers", help="list providers, tiers, and env readiness").set_defaults(func=_cmd_providers)
 

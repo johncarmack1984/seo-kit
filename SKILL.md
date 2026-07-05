@@ -33,6 +33,7 @@ seo-kit audit https://example.com         # ANY url: crawl + psi run; config-nee
 seo-kit audit https://example.com --only crawl   # keyless structural pass only
 seo-kit setup                             # in a target repo: scaffold its seo-kit.toml (see below)
 seo-kit audit example.com                 # a configured surface id: full set for that target
+seo-kit trend example.com                 # Measure phase: metric timeseries table + SVG from the report history
 ```
 
 The target is a raw URL (portable mode) or a surface id; ids resolve local-first (the nearest `seo-kit.toml` walking up from cwd, then the tool home's `surfaces.toml`). Reports for a per-repo surface land in that repo's `reports_dir` (default `seo-reports/`); everything else goes to `reports/` in the tool home. (Developing in the tool repo itself? prefix `uv run`.)
@@ -82,7 +83,7 @@ Only `id` + `url` are required. Each extra field unlocks a provider for that tar
 2. Discover - pull real queries / volumes / trends + an LLM-citation baseline; build the keyword + entity map.
 3. Audit - run the providers; rank findings by impact x effort.
 4. Optimize - apply fixes (titles, schema, prerender, README/profile keywords, internal links, GEO-citable content).
-5. Measure - re-run on a cadence; attribute by trend.
+5. Measure - re-run on a cadence; attribute by trend. `seo-kit trend <id>` renders the committed report history as a per-metric table + small-multiples SVG (gaps stay gaps; partial runs contribute only what they measured).
 
 ## Providers and tiers
 

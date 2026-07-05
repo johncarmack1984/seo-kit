@@ -1,0 +1,406 @@
+{
+  "surface": {
+    "id": "seo-kit",
+    "url": "https://seo-kit.johncarmack.com/",
+    "kind": "site",
+    "gsc_property": "sc-domain:seo-kit.johncarmack.com",
+    "github_repo": "johncarmack1984/seo-kit",
+    "positioning": "Real-data SEO + GEO audit CLI: free Tier-0 core, paid tiers opt-in, honest about limits; measures LLM citation and namesake disambiguation, not just rankings",
+    "seed_keywords": [
+      "generative engine optimization tool",
+      "GEO audit tool",
+      "LLM SEO audit",
+      "AI search visibility audit",
+      "open source SEO audit CLI"
+    ],
+    "providers": [],
+    "surface_markers": [
+      "johncarmack1984",
+      "seo-kit.johncarmack.com"
+    ],
+    "namesake_markers": [
+      "wordpress",
+      "rank math",
+      "yoast",
+      "woocommerce"
+    ],
+    "geo_probes": [
+      "What open-source tools audit GEO (generative engine optimization) - whether LLM answer engines cite a site?",
+      "Is there a CLI that checks whether a site is readable by LLM crawlers and measures its JS render gap?",
+      "What is seo-kit by johncarmack1984 on GitHub?",
+      "Name tools that combine Search Console and PageSpeed data with LLM citation probes.",
+      "What tools measure whether ChatGPT or Perplexity surface a person or brand correctly?"
+    ],
+    "cite_domains": [
+      "seo-kit.johncarmack.com",
+      "github.com/johncarmack1984/seo-kit"
+    ]
+  },
+  "results": [
+    {
+      "provider": "crawl",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "final_url",
+          "value": "https://seo-kit.johncarmack.com/",
+          "note": ""
+        },
+        {
+          "key": "status",
+          "value": 200,
+          "note": ""
+        },
+        {
+          "key": "title",
+          "value": "seo-kit - real-data SEO + GEO audit CLI",
+          "note": ""
+        },
+        {
+          "key": "title_len",
+          "value": 39,
+          "note": ""
+        },
+        {
+          "key": "meta_description",
+          "value": "A free, open-source CLI that audits any site with real data: on-page SEO, Core Web Vitals, structured data, and whether LLM answer engines surface you correctly.",
+          "note": ""
+        },
+        {
+          "key": "canonical",
+          "value": "https://seo-kit.johncarmack.com/",
+          "note": ""
+        },
+        {
+          "key": "html_lang",
+          "value": "en",
+          "note": ""
+        },
+        {
+          "key": "og_tags",
+          "value": 5,
+          "note": ""
+        },
+        {
+          "key": "twitter_tags",
+          "value": 3,
+          "note": ""
+        },
+        {
+          "key": "h1_raw",
+          "value": [
+            "Real-data SEO and GEO audits for any site"
+          ],
+          "note": ""
+        },
+        {
+          "key": "raw_html_words",
+          "value": 402,
+          "note": ""
+        },
+        {
+          "key": "jsonld_types_raw",
+          "value": [
+            "SoftwareApplication",
+            "WebSite"
+          ],
+          "note": ""
+        },
+        {
+          "key": "rendered",
+          "value": "skipped (install 'render' extra for the JS-gap)",
+          "note": ""
+        },
+        {
+          "key": "robots_txt",
+          "value": "ok",
+          "note": ""
+        },
+        {
+          "key": "sitemap_urls",
+          "value": 1,
+          "note": ""
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "psi",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "performance_score",
+          "value": 100,
+          "note": ""
+        },
+        {
+          "key": "LCP",
+          "value": "0.8\u00a0s",
+          "note": ""
+        },
+        {
+          "key": "CLS",
+          "value": "0",
+          "note": ""
+        },
+        {
+          "key": "TBT",
+          "value": "0\u00a0ms",
+          "note": ""
+        },
+        {
+          "key": "SpeedIndex",
+          "value": "0.8\u00a0s",
+          "note": ""
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "gsc",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "query_count_28d",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "total_clicks_28d",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "total_impressions_28d",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "top_queries",
+          "value": [],
+          "note": ""
+        }
+      ],
+      "findings": [
+        {
+          "severity": "low",
+          "code": "gsc.no_data",
+          "message": "no Search Console query data yet (new/low-traffic property; data lags ~2 days)."
+        }
+      ],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "github",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "description",
+          "value": "Real-data SEO + GEO (LLM-citation) audit toolkit. Free Tier-0 core; paid tiers opt-in.",
+          "note": ""
+        },
+        {
+          "key": "topics",
+          "value": [
+            "cli",
+            "core-web-vitals",
+            "generative-engine-optimization",
+            "geo",
+            "llm",
+            "python",
+            "seo",
+            "seo-audit",
+            "structured-data"
+          ],
+          "note": ""
+        },
+        {
+          "key": "stars",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "homepage",
+          "value": "https://seo-kit.johncarmack.com/",
+          "note": ""
+        },
+        {
+          "key": "views_14d",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "uniques_14d",
+          "value": 0,
+          "note": ""
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "bing",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "rank_traffic_points",
+          "value": 0,
+          "note": ""
+        },
+        {
+          "key": "query_rows",
+          "value": 0,
+          "note": ""
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "trends",
+      "tier": 0,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "avg_interest_12m",
+          "value": [
+            "generative engine optimization tool: 42.3",
+            "AI search visibility audit: 9.1",
+            "LLM SEO audit: 6.6",
+            "GEO audit tool: 1.3",
+            "open source SEO audit CLI: 0.0"
+          ],
+          "note": "0-100 relative"
+        }
+      ],
+      "findings": [],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "dataforseo",
+      "tier": 1,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "keyword_volumes",
+          "value": [
+            "generative engine optimization tool: 480/mo (comp=LOW, cpc=39.31)",
+            "GEO audit tool: 30/mo (comp=MEDIUM, cpc=32.51)",
+            "LLM SEO audit: 10/mo (comp=LOW, cpc=None)",
+            "AI search visibility audit: 10/mo (comp=MEDIUM, cpc=24.14)",
+            "open source SEO audit CLI: 0/mo (comp=None, cpc=None)"
+          ],
+          "note": ""
+        },
+        {
+          "key": "api_cost_usd",
+          "value": 0.09,
+          "note": ""
+        }
+      ],
+      "findings": [
+        {
+          "severity": "low",
+          "code": "dataforseo.zero_volume",
+          "message": "1 seed terms show ~0 volume: open source SEO audit CLI"
+        }
+      ],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "serper",
+      "tier": 1,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "serp_positions",
+          "value": [
+            "generative engine optimization tool: not in top 9",
+            "GEO audit tool: not in top 9",
+            "LLM SEO audit: not in top 10",
+            "AI search visibility audit: not in top 10",
+            "open source SEO audit CLI: not in top 10"
+          ],
+          "note": ""
+        }
+      ],
+      "findings": [
+        {
+          "severity": "medium",
+          "code": "serper.unranked",
+          "message": "seo-kit.johncarmack.com ranks for none of the seed keywords (expected for a new/niche personal site; this is the baseline to move)."
+        }
+      ],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    },
+    {
+      "provider": "geo_probe",
+      "tier": 2,
+      "status": "ok",
+      "signals": [
+        {
+          "key": "perplexity",
+          "value": "surfaced 1/5, conflated 0, cited 0",
+          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] absent; [What tools measure whether ChatGPT...] absent"
+        },
+        {
+          "key": "openai",
+          "value": "surfaced 1/5, conflated 1, cited 0",
+          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] CONFLATED; [What tools measure whether ChatGPT...] absent"
+        },
+        {
+          "key": "anthropic",
+          "value": "surfaced 1/5, conflated 0, cited 0",
+          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] absent; [What tools measure whether ChatGPT...] absent"
+        },
+        {
+          "key": "gemini",
+          "value": "surfaced 1/5, conflated 0, cited 0",
+          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] absent; [What tools measure whether ChatGPT...] absent"
+        }
+      ],
+      "findings": [
+        {
+          "severity": "high",
+          "code": "geo.conflation",
+          "message": "answer engines conflated the surface with a namesake on 1 probe(s) - the disambiguation gap is real."
+        }
+      ],
+      "error": null,
+      "stub_adds": null,
+      "stub_env": [],
+      "stub_contract": null
+    }
+  ]
+}
