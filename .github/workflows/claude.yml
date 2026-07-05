@@ -1,0 +1,47 @@
+name: claude
+
+# Inline agent conversation, scoped to PULL REQUESTS only: mention @claude in a
+# PR comment, review comment, or review to interrogate a change or request a
+# quick revision on the branch. Comments on issues do not trigger this - issues
+# are not an agent lane, and agent PRs originate only from the optimizer's
+# cron/dispatch. Identity: the Claude GitHub App via OIDC exchange.
+# Note: PR conversation comments arrive as issue_comment events, so that
+# trigger stays and the guard requires the comment to be on a pull request.
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  claude:
+    # PR-context only, @claude required, and the action's own write-access
+    # check backed by an author gate.
+    if: >-
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_commit_signing: true
+          settings: |
+            {"includeCoAuthoredBy": false}
+          claude_args: "--model claude-sonnet-5 --max-turns 25 --allowedTools Bash,Edit,Write,Read,Glob,Grep"
