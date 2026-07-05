@@ -1,8 +1,12 @@
 name: claude
 
-# The review loop, on the PR: mention @claude in a PR or issue comment (or a
-# review) and the agent answers or pushes the requested change to the branch.
-# Same identity as the optimizer: the Claude GitHub App via OIDC exchange.
+# Inline agent conversation, scoped to PULL REQUESTS only: mention @claude in a
+# PR comment, review comment, or review to interrogate a change or request a
+# quick revision on the branch. Comments on issues do not trigger this - issues
+# are not an agent lane, and agent PRs originate only from the optimizer's
+# cron/dispatch. Identity: the Claude GitHub App via OIDC exchange.
+# Note: PR conversation comments arrive as issue_comment events, so that
+# trigger stays and the guard requires the comment to be on a pull request.
 
 on:
   issue_comment:
@@ -20,11 +24,11 @@ permissions:
 
 jobs:
   claude:
-    # Defense in depth for a public repo: the action already refuses actors
-    # without write access; this gate also keeps drive-by mentions from even
-    # starting a run.
+    # PR-context only, @claude required, and the action's own write-access
+    # check backed by an author gate.
     if: >-
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude') &&
        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
