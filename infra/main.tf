@@ -90,6 +90,23 @@ resource "aws_cloudfront_distribution" "site" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
+  # audits/: only latest.json is public; the timestamped history is CI-internal
+  # (fetched with credentials), so a viewer-request function 403s the rest.
+  ordered_cache_behavior {
+    path_pattern           = "audits/*"
+    target_origin_id       = "s3-${local.bucket}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    compress               = true
+    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.audits_gate.arn
+    }
+  }
+
   # S3 REST origins return 403 for missing keys; map both to the 404 page.
   custom_error_response {
     error_code         = 403
@@ -113,6 +130,22 @@ resource "aws_cloudfront_distribution" "site" {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
+}
+
+resource "aws_cloudfront_function" "audits_gate" {
+  name    = "seo-kit-audits-gate"
+  runtime = "cloudfront-js-2.0"
+  comment = "audits/: public surface is latest.json only"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var uri = event.request.uri;
+      if (uri.startsWith('/audits/') && uri !== '/audits/latest.json') {
+        return { statusCode: 403, statusDescription: 'Forbidden' };
+      }
+      return event.request;
+    }
+  EOT
 }
 
 data "aws_iam_policy_document" "site" {

@@ -38,11 +38,90 @@ resource "aws_iam_role" "deploy" {
   assume_role_policy = data.aws_iam_policy_document.deploy_trust.json
 }
 
-# Terraform plan refreshes every resource in the stack; read-only keeps the
-# blast radius at zero while staying maintenance-free as the stack grows.
-resource "aws_iam_role_policy_attachment" "deploy_readonly" {
-  role       = aws_iam_role.deploy.name
-  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+# Scoped read set for the CI drift-gate plan: exactly the services this stack
+# touches, and state access limited to this stack's own key. (The AWS-managed
+# ReadOnlyAccess it replaces could read the whole account, including other
+# stacks' terraform state.)
+data "aws_iam_policy_document" "deploy_read" {
+  statement {
+    sid       = "SiteBucketRead"
+    actions   = ["s3:Get*", "s3:List*"]
+    resources = [aws_s3_bucket.site.arn, "${aws_s3_bucket.site.arn}/*"]
+  }
+
+  statement {
+    sid       = "StateList"
+    actions   = ["s3:ListBucket"]
+    resources = ["arn:aws:s3:::john-carmack-terraform-state"]
+
+    condition {
+      test     = "StringLike"
+      variable = "s3:prefix"
+      values   = ["seo-kit/*"]
+    }
+  }
+
+  statement {
+    sid       = "StateRead"
+    actions   = ["s3:GetObject"]
+    resources = ["arn:aws:s3:::john-carmack-terraform-state/seo-kit/*"]
+  }
+
+  statement {
+    sid = "Route53Read"
+    actions = [
+      "route53:GetHostedZone",
+      "route53:ListHostedZones",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource",
+      "route53:GetChange",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "AcmRead"
+    actions = [
+      "acm:DescribeCertificate",
+      "acm:ListCertificates",
+      "acm:ListTagsForCertificate",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "CloudFrontRead"
+    actions = [
+      "cloudfront:GetDistribution",
+      "cloudfront:GetDistributionConfig",
+      "cloudfront:GetOriginAccessControl",
+      "cloudfront:GetFunction",
+      "cloudfront:DescribeFunction",
+      "cloudfront:ListTagsForResource",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "SelfRead"
+    actions = [
+      "iam:GetRole",
+      "iam:ListRolePolicies",
+      "iam:GetRolePolicy",
+      "iam:ListAttachedRolePolicies",
+      "iam:GetOpenIDConnectProvider",
+    ]
+    resources = [
+      "arn:aws:iam::735853783919:role/seo-kit-github-deploy",
+      data.aws_iam_openid_connect_provider.github.arn,
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "deploy_read" {
+  name   = "plan-scoped-read"
+  role   = aws_iam_role.deploy.id
+  policy = data.aws_iam_policy_document.deploy_read.json
 }
 
 data "aws_iam_policy_document" "deploy_writes" {
