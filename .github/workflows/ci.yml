@@ -20,3 +20,13 @@ jobs:
       - run: uv run pytest -q
       # Smoke: a fresh checkout has no config.toml, so this exercises the built-in defaults path.
       - run: uv run seo-kit providers
+
+  # Credless static checks; the deploy workflow's plan job covers live drift.
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+      - run: terraform -chdir=infra fmt -check -diff
+      - run: terraform -chdir=infra init -backend=false -input=false
+      - run: terraform -chdir=infra validate

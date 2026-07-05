@@ -1,9 +1,9 @@
 # seo-kit.johncarmack.com — static site: private S3 origin behind CloudFront
 # (OAC), ACM cert with DNS validation, Route53 aliases.
 #
-# Deploy content after apply (from the repo root):
-#   aws s3 sync site/ s3://seo-kit-johncarmack-com --delete
-#   aws cloudfront create-invalidation --distribution-id $(terraform -chdir=infra output -raw distribution_id) --paths "/*"
+# Content deploys ride .github/workflows/deploy.yml (push to main, OIDC via
+# deploy-role.tf — no AWS keys). Infra applies stay local:
+#   terraform -chdir=infra apply
 
 locals {
   domain = "seo-kit.johncarmack.com"

@@ -1,0 +1,113 @@
+name: deploy
+
+# stormdeck's deploy model, sized for a static site: one ordered pipeline so the
+# site never publishes against un-planned infra. A merge touching both halves
+# runs infra first and gates the site half on it; single-sided merges skip the
+# half they don't need. No AWS keys anywhere — jobs assume the
+# seo-kit-github-deploy role via OIDC (trust pinned to main on this repo).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'infra/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# Least privilege at the workflow level; each job escalates only what it needs.
+permissions:
+  contents: read
+
+# Serialize deploys so two quick merges can't interleave.
+concurrency: deploy
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      site: ${{ steps.filter.outputs.site }}
+      infra: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
+        id: filter
+        with:
+          filters: |
+            site:
+              - 'site/**'
+              - '.github/workflows/deploy.yml'
+            infra:
+              - 'infra/**'
+              - '.github/workflows/deploy.yml'
+
+  # Drift gate, not an apply: plan against live state and fail on any diff
+  # (applies stay local, per the my-infra plan-role convention). -lock=false so
+  # a cancelled run can't strand the state lock; the role is read-only anyway.
+  infra:
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+      - uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      - run: terraform -chdir=infra init -input=false
+      - run: terraform -chdir=infra plan -input=false -lock=false -detailed-exitcode
+
+  # Publish only after infra succeeds (or was skipped, for a site-only merge).
+  site:
+    needs: [changes, infra]
+    if: >-
+      always() &&
+      needs.changes.outputs.site == 'true' &&
+      needs.infra.result != 'failure' &&
+      needs.infra.result != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Sync site to S3
+        run: |
+          # index.html always revalidates; the other root files stay refreshable.
+          aws s3 sync site/ s3://seo-kit-johncarmack-com --delete \
+            --exclude index.html \
+            --cache-control "public, max-age=3600"
+          aws s3 cp site/index.html s3://seo-kit-johncarmack-com/index.html \
+            --cache-control "no-cache"
+      - name: Invalidate unhashed paths
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.DISTRIBUTION_ID }} \
+            --paths "/" "/index.html" "/robots.txt" "/sitemap.xml" "/404.html"
+      # Record the publish as a GitHub Deployment via the API, NOT a job-level
+      # `environment:` — that key rewrites the OIDC subject to
+      # repo:…:environment:…, which the role's main-pinned trust rejects.
+      - name: Record production deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          body=$(jq -nc --arg ref "$GITHUB_SHA" \
+            '{ref:$ref, environment:"production", production_environment:true, auto_merge:false, required_contexts:[], description:("deploy " + $ref[0:7])}')
+          id=$(gh api -X POST "repos/$GITHUB_REPOSITORY/deployments" --input - <<<"$body" --jq '.id')
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+            -f state=success \
+            -f environment=production \
+            -f environment_url=https://seo-kit.johncarmack.com/ \
+            -f description="Published ${GITHUB_SHA:0:7} to production" >/dev/null
+          echo "Recorded production deployment $id (${GITHUB_SHA:0:7})"
