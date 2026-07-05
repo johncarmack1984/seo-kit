@@ -31,3 +31,7 @@ One entry per optimizer PR: date, finding targeted, change, expected movement + 
 - Change: `seo-kit.toml` - removed `"open source SEO audit CLI"` from `seed_keywords`, leaving the 4 seeds that all show measured demand (480, 30, 10, 10 /mo via dataforseo). No other keys touched.
 - Expected movement + horizon: not a scoreboard metric - `dataforseo`/`trends` are inputs, never judged directly (per the latency table). Expected effect is measurement hygiene only: `dataforseo.zero_volume` stops recurring on the next `dataforseo` run, and `serper`'s seed list narrows from 5 to 4 demand-validated terms. No SERP or GEO movement is claimed for this change.
 - Verify: localhost crawl audit against the site (unmodified by this PR) reports zero findings; `uv run pytest -q` 23 passed.
+
+## 2026-07-05 — public flip (human)
+
+- Repository went public (confirmed 2026-07-05T07:0xZ; anonymous API access verified, 9 topics visible). This is the predicted discontinuity for the slow lanes: serper and the GEO category probes measure a public repo from this date. Attribute movement after this point to the flip before crediting any single content change.
