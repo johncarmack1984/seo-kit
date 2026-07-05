@@ -37,4 +37,5 @@ jobs:
       - uses: anthropics/claude-code-action@558b1d6cab4085c7753fe402c10bef0fbb92ac7a # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          use_commit_signing: true
           claude_args: "--model claude-sonnet-5 --max-turns 25 --allowedTools Bash,Edit,Write,Read,Glob,Grep"
