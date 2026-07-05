@@ -78,7 +78,7 @@ jobs:
           aws s3 cp trend-seo-kit.svg s3://seo-kit-johncarmack-com/trend-seo-kit.svg \
             --cache-control "public, max-age=3600" --content-type image/svg+xml
           aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.DISTRIBUTION_ID }} --paths "/trend-seo-kit.svg"
+            --distribution-id ${{ vars.DISTRIBUTION_ID }} --paths "/trend-seo-kit.svg" "/audits/latest.json"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: seo-report
