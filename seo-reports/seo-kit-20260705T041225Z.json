@@ -54,12 +54,12 @@
         },
         {
           "key": "title",
-          "value": "seo-kit - real-data SEO + GEO audit CLI",
+          "value": "seo-kit - real-data SEO + generative engine optimization audits",
           "note": ""
         },
         {
           "key": "title_len",
-          "value": 39,
+          "value": 63,
           "note": ""
         },
         {
@@ -96,7 +96,7 @@
         },
         {
           "key": "raw_html_words",
-          "value": 402,
+          "value": 444,
           "note": ""
         },
         {
@@ -156,7 +156,7 @@
         },
         {
           "key": "SpeedIndex",
-          "value": "0.8\u00a0s",
+          "value": "0.9\u00a0s",
           "note": ""
         }
       ],
@@ -286,7 +286,7 @@
         {
           "key": "avg_interest_12m",
           "value": [
-            "generative engine optimization tool: 42.3",
+            "generative engine optimization tool: 42.7",
             "AI search visibility audit: 9.1",
             "LLM SEO audit: 6.6",
             "GEO audit tool: 1.3",
@@ -344,9 +344,9 @@
           "key": "serp_positions",
           "value": [
             "generative engine optimization tool: not in top 9",
-            "GEO audit tool: not in top 9",
+            "GEO audit tool: not in top 10",
             "LLM SEO audit: not in top 10",
-            "AI search visibility audit: not in top 10",
+            "AI search visibility audit: not in top 7",
             "open source SEO audit CLI: not in top 10"
           ],
           "note": ""
@@ -376,8 +376,8 @@
         },
         {
           "key": "openai",
-          "value": "surfaced 1/5, conflated 1, cited 0",
-          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] CONFLATED; [What tools measure whether ChatGPT...] absent"
+          "value": "surfaced 1/5, conflated 0, cited 0",
+          "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] absent; [What tools measure whether ChatGPT...] absent"
         },
         {
           "key": "anthropic",
@@ -390,13 +390,7 @@
           "note": "[What open-source tools audit GEO (...] absent; [Is there a CLI that checks whether...] absent; [What is seo-kit by johncarmack1984...] surfaced; [Name tools that combine Search Con...] absent; [What tools measure whether ChatGPT...] absent"
         }
       ],
-      "findings": [
-        {
-          "severity": "high",
-          "code": "geo.conflation",
-          "message": "answer engines conflated the surface with a namesake on 1 probe(s) - the disambiguation gap is real."
-        }
-      ],
+      "findings": [],
       "error": null,
       "stub_adds": null,
       "stub_env": [],

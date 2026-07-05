@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 706" width="720" height="706" role="img" aria-labelledby="t d">
 <title id="t">seo-kit audit trend for seo-kit</title>
-<desc id="d">Small-multiple line charts of audit metrics across 3 audits from 2026-07-05 to 2026-07-05. Data: the seo-reports directory.</desc>
+<desc id="d">Small-multiple line charts of audit metrics across 1 audits from 2026-07-05 to 2026-07-05. Data: the seo-reports directory.</desc>
 <style>
   text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #21201d; }
   .muted { fill: #6d685e; font-size: 11px; }
@@ -17,54 +17,43 @@
   }
 </style>
 <text x="16" y="22" style="font-weight:600">seo-kit audit trend - seo-kit</text>
-<text x="16" y="38" class="muted">3 audits, Jul 05 to Jul 05 2026 (UTC)</text>
+<text x="16" y="38" class="muted">1 audits, Jul 05 to Jul 05 2026 (UTC)</text>
 <text x="16" y="56">PageSpeed score, mobile (0-100)</text>
 <line x1="16" y1="102" x2="604" y2="102" class="grid"/>
 <circle class="dot" cx="16.0" cy="68.0" r="4"/>
-<circle class="dot" cx="604.0" cy="68.0" r="4"/>
 <text x="616" y="100" class="val">100</text>
 <text x="16" y="126">GEO probes surfaced (all engines)</text>
 <line x1="16" y1="172" x2="604" y2="172" class="grid"/>
 <circle class="dot" cx="16.0" cy="142.4" r="4"/>
-<circle class="dot" cx="604.0" cy="142.4" r="4"/>
 <text x="616" y="170" class="val">4</text>
 <text x="16" y="196">GEO namesake conflations</text>
 <line x1="16" y1="242" x2="604" y2="242" class="grid"/>
 <circle class="dot" cx="16.0" cy="242.0" r="4"/>
-<circle class="dot" cx="604.0" cy="212.4" r="4"/>
-<text x="616" y="240" class="val">1</text>
+<text x="616" y="240" class="val">0</text>
 <text x="16" y="266">GEO probes cited</text>
 <line x1="16" y1="312" x2="604" y2="312" class="grid"/>
 <circle class="dot" cx="16.0" cy="312.0" r="4"/>
-<circle class="dot" cx="604.0" cy="312.0" r="4"/>
 <text x="616" y="310" class="val">0</text>
 <text x="16" y="336">Seed keywords ranked in SERP</text>
 <line x1="16" y1="382" x2="604" y2="382" class="grid"/>
 <circle class="dot" cx="16.0" cy="382.0" r="4"/>
-<circle class="dot" cx="604.0" cy="382.0" r="4"/>
 <text x="616" y="380" class="val">0</text>
 <text x="16" y="406">Search Console clicks (28d)</text>
 <line x1="16" y1="452" x2="604" y2="452" class="grid"/>
-<circle class="dot" cx="604.0" cy="452.0" r="4"/>
+<circle class="dot" cx="16.0" cy="452.0" r="4"/>
 <text x="616" y="450" class="val">0</text>
 <text x="16" y="476">Search Console impressions (28d)</text>
 <line x1="16" y1="522" x2="604" y2="522" class="grid"/>
-<circle class="dot" cx="604.0" cy="522.0" r="4"/>
+<circle class="dot" cx="16.0" cy="522.0" r="4"/>
 <text x="616" y="520" class="val">0</text>
 <text x="16" y="546">GitHub stars</text>
 <line x1="16" y1="592" x2="604" y2="592" class="grid"/>
-<polyline class="line" points="16.0,592.0 22.2,592.0 604.0,592.0"/>
 <circle class="dot" cx="16.0" cy="592.0" r="4"/>
-<circle class="dot" cx="22.2" cy="592.0" r="4"/>
-<circle class="dot" cx="604.0" cy="592.0" r="4"/>
 <text x="616" y="590" class="val">0</text>
 <text x="16" y="616">GitHub repo views (14d)</text>
 <line x1="16" y1="662" x2="604" y2="662" class="grid"/>
-<polyline class="line" points="16.0,662.0 22.2,662.0 604.0,662.0"/>
 <circle class="dot" cx="16.0" cy="662.0" r="4"/>
-<circle class="dot" cx="22.2" cy="662.0" r="4"/>
-<circle class="dot" cx="604.0" cy="662.0" r="4"/>
 <text x="616" y="660" class="val">0</text>
-<text x="16" y="690" class="muted">Jul 05 01:07</text>
-<text x="604" y="690" class="muted" text-anchor="end">Jul 05 02:21</text>
+<text x="16" y="690" class="muted">Jul 05 04:12</text>
+<text x="604" y="690" class="muted" text-anchor="end">Jul 05 04:12</text>
 </svg>

@@ -16,3 +16,9 @@ One entry per optimizer PR: date, finding targeted, change, expected movement + 
 - Expected movement + horizon: title/meta relevance for "generative engine optimization tool" improves first (visible next `crawl` run); any `serper` SERP-position movement is a multi-week-to-month SEO lag - do not expect it before 3+ weekly `serper` runs trend the same direction.
 - Verify: localhost crawl audit against the modified page reported zero findings ("No issues flagged by the enabled providers"), `title_len: 56`; `uv run pytest -q` 23 passed.
 - Review amendment (2026-07-05, human gate): targeting kept, casualty reverted. Title is now "seo-kit - real-data SEO + generative engine optimization audits" (63 chars): "real-data" is the differentiator answer engines should quote and "SEO" keeps the category explicit; "CLI" lives in the meta description and the literal "GEO audit" phrase stays covered by the H1. Doctrine gained positioning invariants so relevance wins stop deleting positioning copy.
+
+## 2026-07-05 — baseline reset (human)
+
+- Past is prologue: all pre-baseline readings (system-construction noise: partial runs, pre-title, pre-bing, pre-gates) cleared from HEAD and from the S3 audits/ prefix; they remain in git history. `seo-kit-20260705T041225Z` is t=0: final site state (title experiment merged 2026-07-05T03:07Z, bing live, audits gate up, all providers).
+- Title experiment (PR #6) scored for crawl at t=0: new title serves in server HTML, zero crawl findings. Confirmed.
+- Reads-after (from merge 2026-07-05T03:07Z): bing=2026-07-08, gsc=2026-07-12, geo_probe:perplexity=2026-07-19, serper=2026-08-02. serper and the GEO category probes will also carry the public-flip discontinuity; attribute accordingly.
