@@ -8,9 +8,17 @@ on:
   # (its events don't trigger workflows, so optimizer PRs need a click).
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         python: ["3.12", "3.13"]
@@ -27,9 +35,12 @@ jobs:
   # Credless static checks; the deploy workflow's plan job covers live drift.
   terraform:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.15.7
       - run: terraform -chdir=infra fmt -check -diff
       - run: terraform -chdir=infra init -backend=false -input=false
       - run: terraform -chdir=infra validate
