@@ -24,6 +24,7 @@ concurrency: deploy
 jobs:
   changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -49,12 +50,15 @@ jobs:
     needs: changes
     if: needs.changes.outputs.infra == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       id-token: write
       contents: read
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.15.7
       - uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6
         with:
           role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
@@ -71,6 +75,7 @@ jobs:
       needs.infra.result != 'failure' &&
       needs.infra.result != 'cancelled'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write
       contents: read
