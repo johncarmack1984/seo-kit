@@ -35,3 +35,10 @@ One entry per optimizer PR: date, finding targeted, change, expected movement + 
 ## 2026-07-05 — public flip (human)
 
 - Repository went public (confirmed 2026-07-05T07:0xZ; anonymous API access verified, 9 topics visible). This is the predicted discontinuity for the slow lanes: serper and the GEO category probes measure a public repo from this date. Attribute movement after this point to the flip before crediting any single content change.
+
+## 2026-07-16 — loop repair (human)
+
+- Diagnosis: zero optimizer PRs since 2026-07-05 despite daily green runs. The 2026-07-13 run exhausted its 40-turn budget (error_max_turns), left an empty `optimize/2026-07-13` branch, and failed with no alerting; runs since concluded without writing the verdicts they owed. Root cause was a doctrine conflict: "score before you act" demands a verdict log entry, while "if nothing is actionable, do nothing - no PR, no log entry" reads as forbidding the PR that entry needs; the agent resolved it toward silence. A second gap: `gsc=` Reads-after dates can never be scored from CI inputs (the audits/latest.json tripwire excludes gsc).
+- Changes: doctrine now states a matured verdict alone requires a log-entry-only PR (do-nothing narrowed to nothing-matured-AND-nothing-actionable); gsc verdicts score from committed milestone reports or record `awaiting local audit` once; the workflow prompt names the score-first duty; max-turns 40 -> 80; a failure step now opens an issue when a run dies; the empty orphan branch deleted.
+- Owed verdicts outstanding for the next run to score: bing (matured 2026-07-08, current reading: rank_traffic_points 9, query_rows 0), gsc (matured 2026-07-12, no committed post-maturity milestone yet -> expect `awaiting local audit`). serper and the GEO category probes stay frozen to ~2026-08-02 with the public-flip discontinuity noted on 2026-07-05.
+- Independent reading, same day (from a local full-slice audit, not CI): perplexity produced the surface's first citation (surfaced 1/5, cited 1); parametric engines still name-only. Not a verdict - the geo_probe:perplexity window (2026-07-19) has not passed - but the trend direction is right.
