@@ -70,6 +70,7 @@ def test_svg_renders_present_panels_with_gaps(tmp_path):
     svg = render_svg(snaps, "x.com")
     ET.fromstring(svg)  # well-formed XML
     assert "prefers-color-scheme: dark" in svg
+    assert 'class="bg"' in svg  # self-painted background: readable on any page
     assert "PageSpeed score" in svg
     assert "GitHub stars" in svg
     assert "Search Console clicks" not in svg  # no gsc data -> no panel
