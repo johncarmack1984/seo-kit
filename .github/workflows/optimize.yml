@@ -41,5 +41,15 @@ jobs:
           settings: |
             {"includeCoAuthoredBy": false}
           prompt: |
-            Read OPTIMIZER.md at the repo root and execute today's optimization pass exactly as it prescribes. Honor its allowed-surface list, its one-change-per-run discipline, and its do-nothing-when-nothing-is-actionable rule. If you act: branch optimize/<today's date>, verify per the doctrine, open the PR, and append your log entry within that same PR.
-          claude_args: "--model claude-sonnet-5 --max-turns 40 --allowedTools Bash,Edit,Write,Read,Glob,Grep,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
+            Read OPTIMIZER.md at the repo root and execute today's optimization pass exactly as it prescribes. Score matured experiments FIRST - a matured verdict alone requires a log-entry PR, even with no new optimization. Honor its allowed-surface list, its one-change-per-run discipline, and its do-nothing-when-nothing-matured-and-nothing-is-actionable rule. If you act: branch optimize/<today's date>, verify per the doctrine, open the PR, and append your log entry within that same PR.
+          claude_args: "--model claude-sonnet-5 --max-turns 80 --allowedTools Bash,Edit,Write,Read,Glob,Grep,mcp__github_file_ops__commit_files,mcp__github_file_ops__delete_files"
+      # A dead scheduled run must page, not vanish: the 2026-07-13 run exhausted
+      # its turn budget, failed, and the loop sat stalled with nobody told.
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "optimize run failed $(date -u +%Y-%m-%d)" \
+            --body "Scheduled optimizer run failed. Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
