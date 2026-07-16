@@ -26,6 +26,24 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
+# Fleet audit history: private, never served (no CloudFront origin). The
+# scheduled fleet audit (.github/workflows/audit-fleet.yml) accumulates each
+# surface's report JSON + trend SVG under fleet/<surface-id>/; reads happen
+# via the CLI (`seo-kit trend --reports-dir` on a synced copy) or the console.
+# Some fleet surfaces' full configs live in their own private repos, so this
+# history deliberately stays out of the public-served site bucket.
+resource "aws_s3_bucket" "fleet_audits" {
+  bucket = "seo-kit-fleet-audits"
+}
+
+resource "aws_s3_bucket_public_access_block" "fleet_audits" {
+  bucket                  = aws_s3_bucket.fleet_audits.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_cloudfront_origin_access_control" "site" {
   name                              = local.domain
   origin_access_control_origin_type = "s3"
