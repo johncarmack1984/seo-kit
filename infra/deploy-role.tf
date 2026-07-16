@@ -146,6 +146,21 @@ data "aws_iam_policy_document" "deploy_writes" {
     actions   = ["cloudfront:CreateInvalidation"]
     resources = [aws_cloudfront_distribution.site.arn]
   }
+
+  # The fleet audit reads back its own history (aws s3 sync needs List + Get)
+  # and appends the new report + regenerated trend. No deletes: history only
+  # accumulates; pruning, if ever, happens with human credentials.
+  statement {
+    sid       = "FleetHistoryObjects"
+    actions   = ["s3:PutObject", "s3:GetObject"]
+    resources = ["${aws_s3_bucket.fleet_audits.arn}/*"]
+  }
+
+  statement {
+    sid       = "FleetHistoryList"
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.fleet_audits.arn]
+  }
 }
 
 resource "aws_iam_role_policy" "deploy_writes" {

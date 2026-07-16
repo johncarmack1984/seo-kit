@@ -1,0 +1,100 @@
+name: audit-fleet
+
+# The fleet cadence: one scheduled run audits every fleet-registered surface
+# (the product and portfolio sites that don't run an audit loop of their own)
+# and accumulates each surface's history under fleet/<id>/ in the private
+# fleet bucket, where `seo-kit trend --reports-dir` graphs it. Same CI slice
+# as the other loops: no gsc (Search Console data stays in local, hand-run
+# audits) and no dataforseo (per-call market data, pulled deliberately).
+# Surfaces whose full keyword/GEO config lives in their own private repo run
+# technical lanes here and their sensitive lanes locally (see surfaces.toml).
+# Offset from self-audit (09:23), johncarmack.com (09:53), optimize (10:23)
+# so the shared provider keys never burst at the same minute.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "38 11 * * *"
+
+permissions:
+  contents: read
+
+concurrency: audit-fleet
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      id-token: write
+      contents: read
+      issues: write
+    env:
+      BUCKET: seo-kit-fleet-audits
+      SURFACES: vegify.app orreryhq.com orrery.sh newearth.llc geobench.johncarmack.com interconnection-atlas promptward lux
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      - run: uv sync
+      - uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-west-2
+      # A fresh checkout has no config.toml, so built-in defaults apply and the
+      # paid tiers stay off (--only filters WITHIN enabled providers). The
+      # runner is a machine; here is its machine-level config.
+      - name: Enable CI provider tiers
+        run: printf '[providers]\nserper = true\ngeo_probe = true\n' > config.toml
+      - name: Audit the fleet
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BING_WEBMASTER_API_KEY: ${{ secrets.BING_WEBMASTER_API_KEY }}
+          PAGESPEED_API_KEY: ${{ secrets.PAGESPEED_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # One surface's failure must not starve the rest: audit them all, then
+        # fail the run at publish time if any audit failed.
+        run: |
+          failed=""
+          for s in $SURFACES; do
+            echo "::group::audit $s"
+            uv run seo-kit audit "$s" --only crawl,psi,bing,github,serper,geo_probe || failed="$failed $s"
+            echo "::endgroup::"
+          done
+          if [ -n "$failed" ]; then
+            echo "::error::audit failed for:$failed"
+            echo "FAILED=$failed" >> "$GITHUB_ENV"
+          fi
+      - name: Publish history + trends
+        run: |
+          for s in $SURFACES; do
+            new=$(ls -t "reports/$s-"*.json 2>/dev/null | head -1) || true
+            [ -n "$new" ] || continue
+            mkdir -p "hist/$s"
+            aws s3 sync "s3://$BUCKET/fleet/$s/" "hist/$s/" --exclude "*" --include "*.json"
+            cp -f "$new" "hist/$s/"
+            uv run seo-kit trend "$s" --reports-dir "hist/$s" --out "hist/$s/trend-$s.svg" || true
+            aws s3 cp "$new" "s3://$BUCKET/fleet/$s/$(basename "$new")"
+            if [ -f "hist/$s/trend-$s.svg" ]; then
+              aws s3 cp "hist/$s/trend-$s.svg" "s3://$BUCKET/fleet/$s/trend-$s.svg" --content-type image/svg+xml
+            fi
+          done
+          [ -z "${FAILED:-}" ] || exit 1
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: fleet-reports
+          path: reports/
+          if-no-files-found: ignore
+      # A dead scheduled run must page, not vanish (the optimize loop's lesson).
+      - name: Alert on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "audit-fleet run failed $(date -u +%Y-%m-%d)" \
+            --body "Scheduled fleet audit failed. Log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"

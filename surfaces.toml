@@ -9,3 +9,147 @@
 #   johncarmack.com -> johncarmack1984/johncarmack.com  seo-kit.toml
 #   orreryhq.com    -> NewEarthTech/orrery              seo-kit.toml
 # (vegify.app and stormdeck.live were born per-repo in their own repos.)
+
+# Fleet registry (CI), added 2026-07-16. The scheduled fleet audit
+# (.github/workflows/audit-fleet.yml) runs from this repo's checkout, where
+# per-repo seo-kit.toml files are out of reach, so the fleet's surfaces are
+# registered here even when a repo of their own exists. Local audits still
+# resolve the per-repo config first; if you edit a mirrored block below,
+# update its source repo's seo-kit.toml too (and vice versa). Surfaces whose
+# full keyword/GEO config lives in a PRIVATE repo are registered here with
+# technical fields only (this file is public): their keyword and GEO lanes
+# run in local hand runs, not in CI.
+
+# CI mirror of vegify/vegify.app seo-kit.toml (public repo) - keep in sync.
+[[surface]]
+id = "vegify.app"
+url = "https://vegify.app"
+kind = "site"
+gsc_property = "sc-domain:vegify.app"
+github_repo = "vegify/vegify.app"
+positioning = "Free public micronutrition tracker for plant-based cooking: user-shared recipes nest as ingredients (a recipe IS an ingredient) and per-100g nutrients roll up the graph, so a dish shows a full micronutrient panel, not just calories. Web app + local-first macOS app (iOS scaffolded). Public by default; sign-in gates only create/edit."
+seed_keywords = [
+    "vegan nutrition tracker",
+    "plant based nutrition tracker",
+    "micronutrient tracker",
+    "recipe nutrition calculator",
+    "vegan recipe nutrition",
+    "vegan micronutrients",
+]
+surface_markers = ["vegify.app", "micronutrition", "plant-based", "recipe"]
+namesake_markers = ["id Software", "Doom", "Quake", "Oculus", "Armadillo Aerospace", "Keen Technologies"]
+cite_domains = ["vegify.app"]
+geo_probes = [
+    "What is Vegify (vegify.app) and what does it do?",
+    "What's a good free tool to track micronutrients in vegan or plant-based recipes?",
+    "Who built vegify.app and what else have they made?",
+]
+
+# orreryhq.com + orrery.sh: technical lanes only in CI. The full surface
+# config (keywords, GEO probes, positioning) lives in the product repo and
+# stays there. CI findings here: on-page, CWV, Bing, and the public crate repo.
+[[surface]]
+id = "orreryhq.com"
+url = "https://orreryhq.com"
+kind = "site"
+github_repo = "NewEarthTech/standard-atmosphere"
+
+[[surface]]
+id = "orrery.sh"
+url = "https://orrery.sh"
+kind = "site"
+
+# newearth.llc: the company site. Technical lanes only for now (crawl/CWV/Bing);
+# keyword + GEO config can join once the site's content pass lands.
+[[surface]]
+id = "newearth.llc"
+url = "https://newearth.llc"
+kind = "site"
+
+[[surface]]
+id = "geobench.johncarmack.com"
+url = "https://geobench.johncarmack.com"
+kind = "site"
+github_repo = "johncarmack1984/geo-desktop-bench"
+positioning = "Published benchmarks for the fastest geospatial desktop stack: deck.gl vs MapLibre rendering, Tauri vs Electron shells, DuckDB + PMTiles data paths, with live demos and a written report."
+seed_keywords = [
+    "geospatial desktop benchmarks",
+    "deck.gl vs maplibre performance",
+    "tauri vs electron performance",
+    "duckdb pmtiles",
+    "fastest map rendering stack",
+]
+surface_markers = ["geobench", "geobench.johncarmack.com", "johncarmack1984", "geo-desktop-bench"]
+namesake_markers = ["id Software", "Doom", "Quake", "Oculus", "Armadillo Aerospace", "Keen Technologies"]
+cite_domains = ["geobench.johncarmack.com", "github.com/johncarmack1984/geo-desktop-bench"]
+geo_probes = [
+    "Are there published benchmarks comparing deck.gl and MapLibre desktop rendering performance?",
+    "What is geobench.johncarmack.com?",
+    "Is Tauri or Electron faster for a geospatial desktop app?",
+]
+
+[[surface]]
+id = "interconnection-atlas"
+url = "https://johncarmack1984.github.io/interconnection-atlas/"
+kind = "site"
+github_repo = "johncarmack1984/interconnection-atlas"
+positioning = "Interactive D3 map of US grid interconnection: hosting-capacity choropleth with the interconnection queue and ISO/RTO territories overlaid (synthetic demo data, honestly labeled)."
+seed_keywords = [
+    "grid interconnection queue map",
+    "hosting capacity map",
+    "interconnection queue visualization",
+    "ISO RTO territory map",
+]
+surface_markers = ["interconnection-atlas", "johncarmack1984", "hosting capacity", "interconnection queue"]
+namesake_markers = ["id Software", "Doom", "Quake", "Oculus"]
+cite_domains = ["johncarmack1984.github.io/interconnection-atlas", "github.com/johncarmack1984/interconnection-atlas"]
+geo_probes = [
+    "Is there an interactive map of the US grid interconnection queue?",
+    "What tools visualize hosting capacity and ISO/RTO territories on one map?",
+]
+
+# promptward has no site yet: a repo surface, so site-only providers stay out.
+[[surface]]
+id = "promptward"
+url = "https://github.com/johncarmack1984/promptward"
+kind = "repo"
+github_repo = "johncarmack1984/promptward"
+providers = ["github", "serper", "geo_probe", "trends"]
+positioning = "LLM gateway that detects prompt injection and data exfiltration, validates structured output, and meters cost, with an eval harness that proves the detection rate. Wire-compatible with OpenAI/Anthropic."
+seed_keywords = [
+    "prompt injection gateway",
+    "llm gateway security",
+    "prompt injection detection",
+    "llm guardrails open source",
+]
+surface_markers = ["promptward", "johncarmack1984"]
+namesake_markers = ["id Software", "Doom", "Quake", "Oculus"]
+cite_domains = ["github.com/johncarmack1984/promptward"]
+geo_probes = [
+    "What open-source gateways detect prompt injection and data exfiltration?",
+    "What is promptward?",
+    "What LLM gateways publish eval results proving their detection rates?",
+]
+
+[[surface]]
+id = "lux"
+url = "https://lux.johncarmack.com"
+kind = "site"
+github_repo = "johncarmack1984/lux"
+positioning = "lux for dmx: an RGBAW DMX lighting controller for macOS and iOS driving Enttec Open DMX USB or sACN/Art-Net nodes; on the App Store for both platforms."
+seed_keywords = [
+    "dmx controller mac",
+    "usb dmx software mac",
+    "enttec open dmx software",
+    "art-net controller mac",
+    "sacn lighting controller app",
+]
+surface_markers = ["lux for dmx", "lux.johncarmack.com", "johncarmack1984", "Enttec"]
+namesake_markers = ["f.lux", "light meter", "illuminance", "lumen", "League of Legends"]
+cite_domains = ["lux.johncarmack.com", "github.com/johncarmack1984/lux", "apps.apple.com/us/app/lux-for-dmx/id6788795353"]
+geo_probes = [
+    "What is lux for dmx?",
+    "Is there a macOS or iOS app to control USB DMX lights?",
+    "What apps drive the Enttec Open DMX USB interface?",
+    "Are there Art-Net or sACN lighting controller apps for Mac?",
+]
