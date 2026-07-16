@@ -27,7 +27,7 @@ url = "https://vegify.app"
 kind = "site"
 gsc_property = "sc-domain:vegify.app"
 github_repo = "vegify/vegify.app"
-positioning = "Free public micronutrition tracker for plant-based cooking: user-shared recipes nest as ingredients (a recipe IS an ingredient) and per-100g nutrients roll up the graph, so a dish shows a full micronutrient panel, not just calories. Web app + local-first macOS app (iOS scaffolded). Public by default; sign-in gates only create/edit."
+positioning = "Free public micronutrition tracker for plant-based cooking: user-shared recipes nest as ingredients (a recipe IS an ingredient) and per-100g nutrients roll up the graph, so a dish shows a full micronutrient panel, not just calories. Web app + local-first macOS app + iOS app on the App Store. Public by default; sign-in gates only create/edit."
 seed_keywords = [
     "vegan nutrition tracker",
     "plant based nutrition tracker",
