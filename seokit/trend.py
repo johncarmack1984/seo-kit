@@ -112,6 +112,7 @@ VAL_X = X1 + 12
 # Literal colors, overridden wholesale in the dark block: CSS custom properties
 # render inconsistently in SVG-as-image contexts (Quick Look et al.), so no var().
 _CSS = """
+  .bg   { fill: #faf9f7; }
   text { font: 12px ui-sans-serif, system-ui, sans-serif; fill: #21201d; }
   .muted { fill: #6d685e; font-size: 11px; }
   .val { font-family: ui-monospace, Menlo, monospace; }
@@ -119,6 +120,7 @@ _CSS = """
   .line { stroke: #a36a10; stroke-width: 2; fill: none; }
   .dot  { fill: #a36a10; stroke: #faf9f7; stroke-width: 2; }
   @media (prefers-color-scheme: dark) {
+    .bg   { fill: #151312; }
     text { fill: #e8e5de; }
     .muted { fill: #a29c90; }
     .grid { stroke: #2e2b27; }
@@ -172,6 +174,11 @@ def render_svg(snaps: list[Snapshot], surface_id: str) -> str:
         f"audits from {t0:%Y-%m-%d} to {t1:%Y-%m-%d}. Data: the seo-reports directory.</desc>"
     )
     out.append(f"<style>{_CSS}</style>")
+    # The panel paints its own background (site --bg, both schemes): the media
+    # query tracks the VIEWER's scheme, not the page behind the SVG, so a
+    # transparent panel goes unreadable the moment a dark-mode user opens the
+    # raw URL on the browser's white canvas.
+    out.append('<rect class="bg" width="100%" height="100%"/>')
     out.append(f'<text x="{X0}" y="22" style="font-weight:600">seo-kit audit trend - {surface_id}</text>')
     out.append(f'<text x="{X0}" y="38" class="muted">{len(snaps)} audits, {t0:%b %d} to {t1:%b %d %Y} (UTC)</text>')
 
