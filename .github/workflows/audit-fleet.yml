@@ -83,6 +83,22 @@ jobs:
             fi
           done
           [ -z "${FAILED:-}" ] || exit 1
+      # The private dashboard (dashboard.johncarmack.com, my-infra-private's
+      # seo-dashboard root): one generated page + the trend SVGs, short
+      # max-age instead of invalidations so the role needs only S3.
+      - name: Publish dashboard
+        env:
+          DASHBOARD_BUCKET: seo-dashboard-johncarmack-com
+        run: |
+          uv run python scripts/fleet_dashboard.py --hist-dir hist --out index.html --surfaces "$SURFACES"
+          for s in $SURFACES; do
+            if [ -f "hist/$s/trend-$s.svg" ]; then
+              aws s3 cp "hist/$s/trend-$s.svg" "s3://$DASHBOARD_BUCKET/fleet/$s/trend-$s.svg" \
+                --content-type image/svg+xml --cache-control "public, max-age=900"
+            fi
+          done
+          aws s3 cp index.html "s3://$DASHBOARD_BUCKET/index.html" \
+            --content-type "text/html; charset=utf-8" --cache-control "public, max-age=900"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
