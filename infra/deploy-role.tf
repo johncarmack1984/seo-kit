@@ -49,6 +49,16 @@ data "aws_iam_policy_document" "deploy_read" {
     resources = [aws_s3_bucket.site.arn, "${aws_s3_bucket.site.arn}/*"]
   }
 
+  # The fleet history bucket is in state, so every plan REFRESHES it - terraform
+  # reads its policy, ACL, versioning and public-access block. Bucket-level only,
+  # deliberately without the "/*" the site grant carries: the plan role has no
+  # business reading fleet audit objects (its writes live in deploy_writes).
+  statement {
+    sid       = "FleetBucketConfigRead"
+    actions   = ["s3:Get*", "s3:List*"]
+    resources = [aws_s3_bucket.fleet_audits.arn]
+  }
+
   statement {
     sid       = "StateList"
     actions   = ["s3:ListBucket"]
