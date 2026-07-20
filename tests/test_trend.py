@@ -1,8 +1,17 @@
 """Trend series extraction and the small-multiples SVG renderer."""
 import json
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 
-from seokit.trend import extract_metrics, load_series, render_svg
+from seokit.trend import (
+    PRIVATE_METRICS,
+    Snapshot,
+    extract_metrics,
+    load_series,
+    public_slice,
+    render_svg,
+    series_json,
+)
 
 
 def _report(providers: dict) -> dict:
@@ -62,6 +71,36 @@ def test_load_series_sorted_and_scoped_to_surface(tmp_path):
     assert snaps[0].stamp < snaps[1].stamp < snaps[2].stamp
     assert "psi_score" not in snaps[1].metrics  # partial report: only github metrics
     assert snaps[1].metrics["gh_stars"] == 2
+
+
+def test_public_slice_drops_search_console_from_svg_and_json():
+    """The tripwire's second half: gsc rides in on committed milestones, never out to the bucket."""
+    gsc = _report({"psi": {"performance_score": 100}, "gsc": {"total_clicks_28d": 41, "total_impressions_28d": 900}})
+    assert extract_metrics(gsc)["gsc_clicks"] == 41  # present before the slice
+
+    snaps = [Snapshot(stamp=datetime(2026, 7, 19, tzinfo=timezone.utc), metrics=extract_metrics(gsc))]
+    public = public_slice(snaps)
+    assert not PRIVATE_METRICS & set(public[0].metrics)
+    assert public[0].metrics["psi_score"] == 100  # non-private metrics survive
+
+    assert "Search Console" not in render_svg(public, "x.com")
+    assert "gsc_clicks" not in json.dumps(series_json(public, "x.com"))
+
+
+def test_series_json_is_one_object_per_reading_oldest_first(tmp_path):
+    _write_reports(tmp_path)
+    doc = series_json(load_series(tmp_path, "x.com"), "x.com")
+
+    assert doc["surface"] == "x.com"
+    assert [r["stamp"] for r in doc["series"]] == [
+        "2026-06-26T12:00:00Z", "2026-07-01T12:00:00Z", "2026-07-04T12:00:00Z",
+    ]
+    # A quotable past reading — the whole point of the file.
+    assert doc["series"][0]["geo_conflated"] == 1
+    assert doc["series"][2]["geo_conflated"] == 0
+    # Partial reports contribute only what they measured; no fabricated continuity.
+    assert "psi_score" not in doc["series"][1]
+    assert doc["metrics"]["geo_conflated"] == "GEO namesake conflations"
 
 
 def test_svg_renders_present_panels_with_gaps(tmp_path):

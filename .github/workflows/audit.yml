@@ -68,18 +68,28 @@ jobs:
         # would go world-readable. GSC belongs in local, hand-curated audits.
         run: uv run seo-kit audit seo-kit --only crawl,psi,bing,github,serper,geo_probe
       - name: Publish report + regenerated trend to the bucket
+        # TRIPWIRE, second half: --only keeps gsc out of the REPORT above, but the
+        # trend artifacts are rebuilt from ci-history/, which is seeded with the
+        # committed seo-reports/*.json - and those DO carry gsc. --public drops
+        # those metrics so neither the SVG nor history.json can publish them.
         run: |
           new=$(ls -t seo-reports/seo-kit-*.json | head -1)
           cp -f "$new" ci-history/
-          uv run seo-kit trend seo-kit --reports-dir ci-history --out trend-seo-kit.svg
+          uv run seo-kit trend seo-kit --reports-dir ci-history --public \
+            --out trend-seo-kit.svg --emit-json history.json
           aws s3 cp "$new" "s3://seo-kit-johncarmack-com/audits/$(basename "$new")"
           # Stable name so the optimizer (and anyone) can fetch today's audit through CloudFront.
           aws s3 cp "$new" "s3://seo-kit-johncarmack-com/audits/latest.json" \
             --cache-control "public, max-age=900" --content-type application/json
+          # The optimizer's history input: every past reading as data, so a verdict
+          # quotes a number instead of reconstructing it from the log's prose.
+          aws s3 cp history.json "s3://seo-kit-johncarmack-com/audits/history.json" \
+            --cache-control "public, max-age=900" --content-type application/json
           aws s3 cp trend-seo-kit.svg s3://seo-kit-johncarmack-com/trend-seo-kit.svg \
             --cache-control "public, max-age=3600" --content-type image/svg+xml
           aws cloudfront create-invalidation \
-            --distribution-id ${{ vars.DISTRIBUTION_ID }} --paths "/trend-seo-kit.svg" "/audits/latest.json"
+            --distribution-id ${{ vars.DISTRIBUTION_ID }} \
+            --paths "/trend-seo-kit.svg" "/audits/latest.json" "/audits/history.json"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: seo-report

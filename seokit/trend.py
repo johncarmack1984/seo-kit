@@ -30,6 +30,13 @@ METRICS: list[tuple[str, str]] = [
     ("gh_views", "GitHub repo views (14d)"),
 ]
 
+# TRIPWIRE (mirrors the one in .github/workflows/audit.yml): the report slice
+# published under audits/ is kept gsc-free at audit time by the --only list, but
+# the derived trend artifacts are built from a history dir that is also seeded
+# with the committed seo-reports/*.json — and those DO carry Search Console
+# data. Anything bound for the public bucket drops these metrics first.
+PRIVATE_METRICS: frozenset[str] = frozenset({"gsc_clicks", "gsc_impressions"})
+
 _GEO = re.compile(r"surfaced (\d+)/(\d+), conflated (\d+), cited (\d+)")
 
 
@@ -96,6 +103,34 @@ def load_series(reports_dir: Path, surface_id: str) -> list[Snapshot]:
             continue
         snaps.append(Snapshot(stamp=stamp, metrics=extract_metrics(report)))
     return snaps
+
+
+def public_slice(snaps: list[Snapshot]) -> list[Snapshot]:
+    """Drop the metrics that must never reach the public audits/ slice (see PRIVATE_METRICS)."""
+    return [
+        Snapshot(stamp=s.stamp, metrics={k: v for k, v in s.metrics.items() if k not in PRIVATE_METRICS})
+        for s in snaps
+    ]
+
+
+def series_json(snaps: list[Snapshot], surface_id: str) -> dict:
+    """The same series the SVG plots, as data: one object per reading, oldest first.
+
+    This is the optimizer's history input. It exists so a verdict can quote a past
+    reading instead of reconstructing it from the log's prose — the failure that
+    produced a fabricated 2026-07-16 conflation value in PR #42.
+    """
+    return {
+        "surface": surface_id,
+        "metrics": {k: label for k, label in METRICS if any(k in s.metrics for s in snaps)},
+        "series": [
+            {
+                "stamp": s.stamp.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                **{k: s.metrics[k] for k, _ in METRICS if k in s.metrics},
+            }
+            for s in snaps
+        ],
+    }
 
 
 # --- SVG rendering -----------------------------------------------------------

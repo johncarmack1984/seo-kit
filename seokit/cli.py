@@ -90,7 +90,7 @@ def _cmd_setup(args: argparse.Namespace) -> int:
 
 
 def _cmd_trend(args: argparse.Namespace) -> int:
-    from .trend import METRICS, load_series, render_svg
+    from .trend import METRICS, load_series, public_slice, render_svg, series_json
 
     local, surfaces = load_local_config(), load_surfaces()
     local_surfaces = local.surfaces if local else {}
@@ -107,6 +107,9 @@ def _cmd_trend(args: argparse.Namespace) -> int:
     if not snaps:
         console.print(f"[yellow]no reports for '{surface.id}' in {reports_dir}[/] - run `seo-kit audit {surface.id}` first.")
         return 1
+    # Applied before anything renders, so the table, the SVG and the JSON agree.
+    if args.public:
+        snaps = public_slice(snaps)
 
     # The SVG plots everything; the table shows the newest handful.
     shown = snaps[-8:]
@@ -125,6 +128,11 @@ def _cmd_trend(args: argparse.Namespace) -> int:
     out = Path(args.out) if args.out else reports_dir / f"trend-{surface.id}.svg"
     out.write_text(render_svg(snaps, surface.id))
     console.print(f"[dim]wrote {out}[/]")
+
+    if args.emit_json:
+        emit = Path(args.emit_json)
+        emit.write_text(json.dumps(series_json(snaps, surface.id), indent=2) + "\n")
+        console.print(f"[dim]wrote {emit}[/]")
     return 0
 
 
@@ -169,6 +177,8 @@ def main(argv: list[str] | None = None) -> int:
     p_trend.add_argument("target", help="a surface id with committed reports (or a URL audited before)")
     p_trend.add_argument("--out", help="SVG output path (default: reports_dir/trend-<id>.svg)")
     p_trend.add_argument("--reports-dir", help="read report history from this directory instead of the resolved one (CI: a synced S3 prefix)")
+    p_trend.add_argument("--emit-json", help="also write the series as JSON (the optimizer's history input)")
+    p_trend.add_argument("--public", action="store_true", help="omit Search Console metrics — required for artifacts published to the public audits/ slice")
     p_trend.set_defaults(func=_cmd_trend)
 
     sub.add_parser("providers", help="list providers, tiers, and env readiness").set_defaults(func=_cmd_providers)
