@@ -108,8 +108,9 @@ resource "aws_cloudfront_distribution" "site" {
     cache_policy_id = "658327ea-f89d-4fab-a63d-7e88639e58f6"
   }
 
-  # audits/: only latest.json is public; the timestamped history is CI-internal
-  # (fetched with credentials), so a viewer-request function 403s the rest.
+  # audits/: latest.json and history.json are public (the optimizer reads both
+  # over CloudFront); the timestamped raw reports stay CI-internal (fetched with
+  # credentials), so a viewer-request function 403s everything else.
   ordered_cache_behavior {
     path_pattern           = "audits/*"
     target_origin_id       = "s3-${local.bucket}"
@@ -153,12 +154,16 @@ resource "aws_cloudfront_distribution" "site" {
 resource "aws_cloudfront_function" "audits_gate" {
   name    = "seo-kit-audits-gate"
   runtime = "cloudfront-js-2.0"
-  comment = "audits/: public surface is latest.json only"
+  comment = "audits/: public surface is latest.json + history.json"
   publish = true
-  code    = <<-EOT
+  # history.json is the optimizer's history input. It carries no more than the
+  # already-public trend SVG (same series, parseable instead of drawn) and is
+  # rendered through `seo-kit trend --public`, which drops the gsc metrics.
+  code = <<-EOT
+    var PUBLIC = ['/audits/latest.json', '/audits/history.json'];
     function handler(event) {
       var uri = event.request.uri;
-      if (uri.startsWith('/audits/') && uri !== '/audits/latest.json') {
+      if (uri.startsWith('/audits/') && PUBLIC.indexOf(uri) === -1) {
         return { statusCode: 403, statusDescription: 'Forbidden' };
       }
       return event.request;
