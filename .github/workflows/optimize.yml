@@ -29,13 +29,22 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      # Agent mode (a direct prompt:, no @claude mention) never reads branch_prefix -
+      # it resolves its branch as CLAUDE_BRANCH || GITHUB_HEAD_REF || GITHUB_REF_NAME,
+      # which on a schedule is main, so every signed commit bounced off the main
+      # ruleset with a silent 422 (#34). Export the branch the doctrine already
+      # prescribes; the signing server creates it from base_branch on the first
+      # commit, so do-nothing days leave no orphan branch.
+      - name: Point agent-mode commit signing at today's optimizer branch
+        run: echo "CLAUDE_BRANCH=optimize/$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
       - uses: anthropics/claude-code-action@3553f84341b92da26052e28acf1aa898f9511f32 # v1.0.177
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           use_commit_signing: true
-          # The signing tool commits to the branch the action checks out; without
-          # these it defaults to main (bounced by the ruleset - caught by the
-          # agent's own re-propose note on its first signed PR).
+          # base_branch feeds BASE_BRANCH - the ref the signing server forks
+          # CLAUDE_BRANCH from when the branch does not exist yet. branch_prefix is
+          # tag-mode-only today (#34); kept so the convention holds if agent mode
+          # ever honors it.
           branch_prefix: "optimize/"
           base_branch: "main"
           settings: |
